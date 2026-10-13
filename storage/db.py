@@ -1,0 +1,102 @@
+"""SQLite-backed time-series store for product stock snapshots."""
+from __future__ import annotations
+
+import sqlite3
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Iterable
+
+import pandas as pd
+
+from scrapers.base import ProductSnapshot
+
+# Different scrapers/actors report the same brand with inconsistent casing or
+# punctuation (e.g. Blinkit vs Zepto vs Instamart), which fragments brand-level
+# analytics (availability %, "top competitor", brand counts) into near-duplicate
+# buckets. Normalize at read time so it's fixed retroactively for already-collected
+# data too, without needing a backfill migration. Keyed by lowercase+stripped name;
+# add an entry here whenever you spot a new duplicate variant in the data.
+BRAND_ALIASES = {
+    "too yumm!": "Too Yumm",
+    "too yumm": "Too Yumm",
+    "let's try": "Let's Try",
+    "yellow diamond": "Yellow Diamond",
+}
+
+
+def _normalize_brand(name: str) -> str:
+    if not isinstance(name, str) or not name.strip():
+        return name
+    return BRAND_ALIASES.get(name.strip().lower(), name.strip())
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    platform TEXT NOT NULL,
+    location_name TEXT NOT NULL,
+    pincode TEXT NOT NULL,
+    merchant_id TEXT,
+    query TEXT,
+    product_id TEXT NOT NULL,
+    brand TEXT NOT NULL,
+    name TEXT NOT NULL,
+    unit TEXT,
+    price REAL,
+    mrp REAL,
+    inventory INTEGER,
+    is_sold_out INTEGER,
+    fetched_at TEXT NOT NULL,
+    is_synthetic INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_snapshots_lookup
+    ON snapshots (platform, location_name, product_id, fetched_at);
+"""
+
+
+def init_db(db_path: str) -> None:
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    with _connect(db_path) as conn:
+        conn.executescript(SCHEMA)
+
+
+@contextmanager
+def _connect(db_path: str):
+    conn = sqlite3.connect(db_path)
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def save_snapshots(db_path: str, snapshots: Iterable[ProductSnapshot]) -> int:
+    rows = [
+        (
+            s.platform, s.location_name, s.pincode, s.merchant_id, s.query,
+            s.product_id, s.brand, s.name, s.unit, s.price, s.mrp,
+            s.inventory, int(s.is_sold_out), s.fetched_at, int(s.is_synthetic),
+        )
+        for s in snapshots
+    ]
+    if not rows:
+        return 0
+    with _connect(db_path) as conn:
+        conn.executemany(
+            """INSERT INTO snapshots
+               (platform, location_name, pincode, merchant_id, query, product_id,
+                brand, name, unit, price, mrp, inventory, is_sold_out, fetched_at, is_synthetic)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            rows,
+        )
+    return len(rows)
+
+
+def load_snapshots(db_path: str) -> pd.DataFrame:
+    with _connect(db_path) as conn:
+        df = pd.read_sql_query("SELECT * FROM snapshots", conn)
+    if not df.empty:
+        df["fetched_at"] = pd.to_datetime(df["fetched_at"])
+        df["is_sold_out"] = df["is_sold_out"].astype(bool)
+        df["is_synthetic"] = df["is_synthetic"].astype(bool)
+        df["brand"] = df["brand"].map(_normalize_brand)
+    return df
