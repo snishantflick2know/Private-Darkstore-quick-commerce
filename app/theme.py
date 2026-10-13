@@ -78,8 +78,15 @@ def inject_css() -> str:
     <style>
     html, body, [class*="css"] {{ font-family: {FONT_FAMILY}; }}
     .block-container {{ padding-top: 0.8rem; padding-bottom: 1.5rem; max-width: 1440px; }}
-    #MainMenu, header[data-testid="stHeader"], [data-testid="stToolbar"],
-    [data-testid="stDecoration"], footer {{ display: none !important; }}
+    /* Hide the "Deploy"/menu chrome, but NOT the whole header - the sidebar's
+       collapse/expand arrow (data-testid="collapsedControl") lives inside that
+       same header element, so hiding it entirely traps the sidebar closed with
+       no way to reopen it. Target only the specific unwanted pieces instead. */
+    #MainMenu, [data-testid="stToolbarActions"], [data-testid="stDecoration"], footer {{
+        display: none !important;
+    }}
+    header[data-testid="stHeader"] {{ background: transparent !important; }}
+    [data-testid="collapsedControl"] {{ display: flex !important; visibility: visible !important; }}
     body {{ background: {CANVAS}; }}
     div[data-testid="stVerticalBlock"] {{ gap: 0.5rem; }}
 
