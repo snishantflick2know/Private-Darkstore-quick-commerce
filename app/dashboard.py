@@ -64,8 +64,17 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    st.markdown('<div class="sb-section-label">Refresh</div>', unsafe_allow_html=True)
+    st.caption("Blinkit only (free). Zepto/Instamart use paid Apify actors, so that refresh is kept to manual `python collector.py` runs only - never exposed here, to avoid a public visitor accidentally spending your Apify balance.")
+    if st.button("🔄 Refresh Blinkit now", use_container_width=True):
+        with st.spinner("Pulling live Blinkit data for all tracked locations..."):
+            import collector as _collector
+            n = _collector.run_once(include_others=False)
+        st.success(f"Collected {n} new rows.")
+        st.rerun()
+
     if df_all.empty:
-        st.info("No data collected yet.")
+        st.info("No data collected yet - click 'Refresh Blinkit now' above to pull live data.")
     else:
         st.markdown('<div class="sb-section-label">Filters</div>', unsafe_allow_html=True)
         platforms = sorted(df_all["platform"].unique())
@@ -93,15 +102,6 @@ with st.sidebar:
                 f'<div class="sb-status-row">{dot} <b>{p.capitalize()}</b> &nbsp;{live_n} live / {synth_n} sim</div>',
                 unsafe_allow_html=True,
             )
-
-        st.markdown('<div class="sb-section-label">Refresh</div>', unsafe_allow_html=True)
-        st.caption("Blinkit only (free). Zepto/Instamart use paid Apify actors, so that refresh is kept to manual `python collector.py` runs only - never exposed here, to avoid a public visitor accidentally spending your Apify balance.")
-        if st.button("🔄 Refresh Blinkit now", use_container_width=True):
-            with st.spinner("Pulling live Blinkit data for all tracked locations..."):
-                import collector as _collector
-                n = _collector.run_once(include_others=False)
-            st.success(f"Collected {n} new rows.")
-            st.rerun()
 
 if df_all.empty:
     st.warning(
