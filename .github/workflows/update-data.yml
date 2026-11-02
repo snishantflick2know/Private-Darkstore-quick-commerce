@@ -6,7 +6,7 @@ name: Update Shelf Pulse data
 # points over time) and the regenerated static JSON snapshots.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "0 * * * *"  # every hour, on the hour - keep in sync with config.AUTO_REFRESH_MINUTES
   workflow_dispatch: {}
 
 permissions:

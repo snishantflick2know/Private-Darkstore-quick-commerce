@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -100,6 +101,26 @@ def save_snapshots(db_path: str, snapshots: Iterable[ProductSnapshot]) -> int:
             rows,
         )
     return len(rows)
+
+
+def prune_old_snapshots(db_path: str, days: int = 30) -> int:
+    """Deletes snapshot rows older than `days`. Without this, the append-only
+    `snapshots` table (and the SQLite file the GitHub Actions workflow commits
+    to git every run) would grow forever - every collector run inserts a full
+    fresh batch of rows regardless of whether anything changed, with no
+    dedup. 30 days is enough history for the trend/depletion-forecast charts
+    to mean something, while keeping storage and repo size bounded. Also runs
+    VACUUM when rows were actually deleted, so the .db file shrinks back down
+    instead of just marking space as reusable internally.
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    with _connect(db_path) as conn:
+        cur = conn.execute("DELETE FROM snapshots WHERE fetched_at < ?", (cutoff,))
+        deleted = cur.rowcount
+        if deleted > 0:
+            conn.commit()  # VACUUM can't run inside a pending transaction
+            conn.execute("VACUUM")
+    return deleted
 
 
 def load_snapshots(db_path: str) -> pd.DataFrame:

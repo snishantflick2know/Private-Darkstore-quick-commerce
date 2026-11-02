@@ -56,7 +56,16 @@ CATEGORY_LABEL = "Juices"  # cosmetic label for the web dashboard's filter chip
 # file instead of the real one (exactly this bug happened once - see git
 # history / AGENTS.md if curious).
 DB_PATH = str(_PROJECT_ROOT / "data" / "stock_tracker.db")
-AUTO_REFRESH_MINUTES = 10  # shared by both the Streamlit app and the web dashboard
+# Shared by the Streamlit app's auto-refresh-if-stale check and the web
+# dashboard's background scheduler. Also mirrored in the GitHub Actions cron
+# schedule (.github/workflows/update-data.yml) - keep both in sync if you
+# change this.
+AUTO_REFRESH_MINUTES = 60
+# How long snapshot history is kept before storage/db.py's
+# prune_old_snapshots() deletes it (called every collector run) - without
+# this, the append-only snapshots table (and the git-committed .db file)
+# grows forever. 30 days is enough for the trend/depletion-forecast charts.
+SNAPSHOT_RETENTION_DAYS = 30
 
 # Experimental: multi-store "sector" coverage. A single point can be served by
 # several real dark stores with independent stock (confirmed: Sector 49 alone

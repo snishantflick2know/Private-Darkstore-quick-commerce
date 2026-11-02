@@ -15,9 +15,9 @@ from __future__ import annotations
 import logging
 import time
 
-from config import DB_PATH, GURGAON_LOCATIONS, SEARCH_QUERIES
+from config import DB_PATH, GURGAON_LOCATIONS, SEARCH_QUERIES, SNAPSHOT_RETENTION_DAYS
 from scrapers.blinkit import BlinkitScraper
-from storage.db import init_db, save_snapshots
+from storage.db import init_db, prune_old_snapshots, save_snapshots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -43,6 +43,11 @@ def run_once() -> int:
             logger.info("%s | %s | %r -> %d products", scraper.platform, loc["name"], query, saved)
             time.sleep(1.2)  # be polite / avoid rate limiting - each query paginates internally too
     logger.info("Done. %d snapshot rows saved.", total)
+
+    pruned = prune_old_snapshots(DB_PATH, days=SNAPSHOT_RETENTION_DAYS)
+    if pruned:
+        logger.info("Pruned %d snapshot rows older than %d days.", pruned, SNAPSHOT_RETENTION_DAYS)
+
     return total
 
 

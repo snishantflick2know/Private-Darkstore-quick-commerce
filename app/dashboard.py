@@ -35,7 +35,7 @@ from analytics.metrics import (
     stockout_duration_hours,
 )
 from analytics.notifications import generate_notifications
-from config import CLIENT_BRAND, DB_PATH, GURGAON_LOCATIONS, TRACKED_BRANDS
+from config import AUTO_REFRESH_MINUTES, CLIENT_BRAND, DB_PATH, GURGAON_LOCATIONS, TRACKED_BRANDS
 from map_render import render_location_map
 from storage.db import init_db, load_notifications, load_snapshots, save_notifications
 from theme import _html, apply_layout, brand_color, card_header, delta_chip, inject_css, kpi_card, status_badge
@@ -50,8 +50,6 @@ def _live_scoped(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df["location_name"].isin(_TRACKED_LOCATION_NAMES)]
     return df[~df["is_synthetic"]]
 
-
-AUTO_REFRESH_MINUTES = 10  # auto-refresh once per browser session if live data is older than this (or missing)
 
 
 def card_header_with_download(icon, title, subtitle, tone, df_for_download, filename):
