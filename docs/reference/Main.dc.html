@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shelf Pulse dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#4F3BDB}a:hover{color:#3A28B8}
+.sp{--bg:#F5F6F8;--surface:#FFFFFF;--surface2:#F9FAFB;--surface3:#F2F4F7;--line:#EAECF0;--line2:#D0D5DD;--hover:#F7F8FA;
+  --ink:#0D0F12;--ink2:#344054;--muted:#475467;--subtle:#667085;
+  --brandSoft:#F0EEFF;--brandInk:#4F3BDB;
+  --real:#0D9488;--raw:#2563EB;--bn:#DB2777;--trop:#98A2B3;
+  --crit:#D92D20;--critBg:#FEF3F2;--critInk:#B42318;--warn:#DC6803;--warnBg:#FFFAEB;--warnInk:#B54708;
+  --ok:#079455;--okBg:#ECFDF3;--okInk:#067647;--infoBg:#EFF8FF;--infoInk:#175CD3;--neuBg:#F2F4F7;--neuInk:#344054;
+  --grid:#EEF0F3;--mapBg:#F2F4F7;--road:#E0E3E8;--river:rgba(37,99,235,.16);--shadow:0 1px 2px rgba(16,24,40,.05);--scrim:rgba(13,15,18,.32)}
+.sp.dark{--bg:#0A0B0D;--surface:#111317;--surface2:#161920;--surface3:#1C2028;--line:#22262E;--line2:#2D323C;--hover:#171A20;
+  --ink:#F3F4F6;--ink2:#D0D4DB;--muted:#9AA1AD;--subtle:#8A919D;
+  --brandSoft:rgba(139,123,255,.14);--brandInk:#B9AFFF;
+  --real:#2DD4BF;--raw:#60A5FA;--bn:#F472B6;--trop:#A3ACB9;
+  --crit:#F97066;--critBg:rgba(249,112,102,.12);--critInk:#FDA29B;--warn:#FDB022;--warnBg:rgba(253,176,34,.12);--warnInk:#FEC84B;
+  --ok:#47CD89;--okBg:rgba(71,205,137,.12);--okInk:#75E0A7;--infoBg:rgba(96,165,250,.12);--infoInk:#93C5FD;--neuBg:rgba(255,255,255,.06);--neuInk:#C3C8D0;
+  --grid:rgba(255,255,255,.06);--mapBg:#0E1014;--road:#20242C;--river:rgba(96,165,250,.2);--shadow:0 1px 0 rgba(255,255,255,.03) inset;--scrim:rgba(0,0,0,.55)}
+.sp{font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.sp button,.sp input{font:inherit;color:inherit}
+.mono{font-variant-numeric:tabular-nums}
+.tnum{font-variant-numeric:tabular-nums}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ics{width:16px;height:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-width:0}
+.nav{display:flex;align-items:center;gap:10px;width:100%;height:38px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;text-align:left}
+.nav:hover{background:var(--hover);color:var(--ink)}
+.nav.on{background:var(--brandSoft);color:var(--brandInk);font-weight:600}
+.cnt{margin-left:auto;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:8px;background:var(--surface);color:var(--ink2);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--hover);color:var(--ink)}
+.btnp{background:var(--brand);border-color:var(--brand);color:#fff}
+.btnp:hover{filter:brightness(1.08);background:var(--brand);color:#fff}
+.btns{height:30px;padding:0 10px;font-size:12.5px}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 8px 0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12.5px;color:var(--muted);cursor:pointer}
+.fchip b{color:var(--ink);font-weight:500}
+.seg{border:0;background:transparent;height:26px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer}
+.seg.on{background:var(--surface3);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+.chip{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap}
+.b-crit{background:var(--critBg);color:var(--critInk)}.b-warn{background:var(--warnBg);color:var(--warnInk)}.b-ok{background:var(--okBg);color:var(--okInk)}
+.b-info{background:var(--infoBg);color:var(--infoInk)}.b-neutral{background:var(--neuBg);color:var(--neuInk)}.b-brand{background:var(--brandSoft);color:var(--brandInk)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.d-bad{color:var(--critInk)}.d-good{color:var(--okInk)}.d-flat{color:var(--subtle)}
+.th{font-size:12.5px;font-weight:500;color:var(--subtle)}
+.trow{display:grid;align-items:center;gap:12px;padding:13px 20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.thead{display:grid;align-items:center;gap:12px;padding:10px 20px;border-top:1px solid var(--line);background:var(--surface2)}
+.rowbtn{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;border-radius:10px;padding:0}
+.rowbtn:hover .hmname{color:var(--brandInk)}
+.hc{height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
+.h-ok{background:var(--okBg);color:var(--okInk)}.h-warn{background:var(--warnBg);color:var(--warnInk)}.h-crit{background:var(--critBg);color:var(--critInk)}.h-avg{background:var(--surface3);color:var(--ink)}
+.own{box-shadow:inset 0 0 0 1.5px var(--brand)}
+.gl{stroke:var(--grid);stroke-width:1}
+.axis{fill:var(--subtle);font-size:11.5px;font-family:'DM Sans',sans-serif}
+.ln{fill:none;stroke-width:1.6;stroke-linecap:round}
+.lnown{fill:none;stroke:var(--brand);stroke-width:2.6;stroke-linecap:round}
+.sk{fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.pinlbl{fill:var(--ink2);font-size:11px;font-weight:500;font-family:'DM Sans',sans-serif}
+.track{height:6px;border-radius:3px;background:var(--surface3);overflow:hidden;flex:1}
+.btn.notes-on{background:#F4F3FF;border-color:#7A5AF8;color:#5925DC}
+.sp.annotate [data-note]{position:relative;outline:2px dashed #7A5AF8;outline-offset:3px}
+.sp.annotate [data-note]::before{content:attr(data-note);position:absolute;top:-11px;left:-11px;z-index:40;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#7A5AF8;color:#FFFFFF;font:600 12px/22px 'DM Sans',sans-serif;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+.sp.annotate aside[data-note="1"]{outline-offset:-4px}
+.sp.annotate aside[data-note="1"]::before{top:8px;left:auto;right:8px}
+</style>
+</helmet>
+
+<div class="{{rootClass}}" style="{{rootStyle}}">
+<div style="display:flex;flex-wrap:wrap;min-height:100vh;align-items:stretch">
+
+  <!-- ================= RAIL ================= -->
+  <aside data-note="1" style="flex:1 1 220px;max-width:100%;box-sizing:border-box;background:var(--surface);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;align-items:center;gap:10px;padding:2px 6px">
+      <div style="width:30px;height:30px;border-radius:9px;background:var(--brand);color:#FFFFFF;display:flex;align-items:center;justify-content:center">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 12 7 12 10 5 14 19 17 12 21 12"></polyline></svg>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:15.5px">Shelf Pulse</div>
+        <div style="font-size:12px;color:var(--subtle)">Quick commerce</div>
+      </div>
+    </div>
+
+    <button type="button" data-note="2" aria-label="Switch brand" style="display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;text-align:left">
+      <span style="width:30px;height:30px;border-radius:8px;background:#F6E7CF;color:#6B3E0B;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none">PB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600;line-height:1.2">Paper Boat</span><span style="font-size:12px;color:var(--subtle)">Hector Beverages</span></span>
+      <svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--subtle)"><path d="M8 9l4-4 4 4"></path><path d="M16 15l-4 4-4-4"></path></svg>
+    </button>
+
+    <nav aria-label="Main" style="display:flex;flex-direction:column;gap:2px">
+      <div class="th" style="padding:0 10px 6px">Analytics</div>
+      <button type="button" class="{{nav.overview}}" onClick="{{go.overview}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>Overview</button>
+      <button type="button" class="{{nav.stock}}" onClick="{{go.stock}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5"></path><path d="M12 13v8"></path></svg>Stock-outs<span class="cnt b-crit">5</span></button>
+      <button type="button" class="{{nav.comp}}" onClick="{{go.comp}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M21 20H3"></path></svg>Competition</button>
+      <button type="button" class="{{nav.fore}}" onClick="{{go.fore}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Depletion forecast</button>
+      <button type="button" class="{{nav.alerts}}" onClick="{{go.alerts}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10 21a2 2 0 0 0 4 0"></path></svg>Alerts<span class="cnt b-neutral">6</span></button>
+    </nav>
+
+    <nav aria-label="Workspace" style="display:flex;flex-direction:column;gap:2px">
+      <div class="th" style="padding:0 10px 6px">Workspace</div>
+      <button type="button" class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10"></path><path d="M18 7h2"></path><circle cx="16" cy="7" r="2"></circle><path d="M4 17h4"></path><path d="M12 17h8"></path><circle cx="10" cy="17" r="2"></circle></svg>Alert rules</button>
+      <button type="button" class="nav"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"></path></svg>Data sources</button>
+    </nav>
+
+    <div data-note="3" style="margin-top:auto;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface2)">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px var(--okBg)"></span>Data is up to date</div>
+      <div style="font-size:12px;color:var(--subtle);margin-top:6px;line-height:1.5">We check 5 {{platform}} stores every 10 minutes. Next check in 6 min.</div>
+      <div aria-hidden="true" style="display:flex;gap:2px;margin-top:10px;height:18px;align-items:flex-end">
+        <sc-for list="{{feedBars}}" as="fb" hint-placeholder-count="12"><span style="{{fb.style}}"></span></sc-for>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div style="flex:999 1 640px;min-width:0;display:flex;flex-direction:column">
+
+    <header data-note="4" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--surface)">
+      <div style="min-width:0">
+        <div style="font-size:13px;color:var(--subtle)">Paper Boat › {{crumb}}</div>
+        <h1 style="margin:2px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em">{{pageTitle}}</h1>
+      </div>
+      <div style="margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <label style="display:flex;align-items:center;gap:8px;height:36px;width:260px;max-width:100%;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--subtle);font-size:13px">
+          <svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input type="search" aria-label="Search" placeholder="Search products or stores" style="border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit;font-size:13.5px;color:var(--ink)">
+        </label>
+        <button type="button" class="{{notesBtnCls}}" onClick="{{toggleNotes}}" aria-pressed="{{notesOn}}"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>{{notesLabel}}</button>
+        <button type="button" class="btn" aria-label="Toggle light or dark theme" onClick="{{toggleTheme}}" style="width:36px;padding:0;justify-content:center">
+          <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+          <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></sc-if>
+        </button>
+        <button type="button" class="btn" aria-label="Refresh" style="width:36px;padding:0;justify-content:center"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 4v5h-5"></path></svg></button>
+        <button type="button" class="btn btnp"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>Export</button>
+      </div>
+    </header>
+
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 28px;border-bottom:1px solid var(--line);background:var(--surface)">
+      <div role="group" data-note="5" aria-label="Platform" style="display:inline-flex;padding:3px;gap:2px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)">
+        <sc-for list="{{platforms}}" as="pl" hint-placeholder-count="3"><button type="button" class="{{pl.cls}}" onClick="{{pl.pick}}">{{pl.label}}</button></sc-for>
+      </div>
+      <button type="button" class="fchip" data-note="6">Region <b>Delhi NCR</b><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <button type="button" class="fchip">Dark stores <b>All 5</b><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <button type="button" class="fchip">Competitors <b>4 brands</b><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <button type="button" class="fchip">Category <b>Juices</b><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <div role="group" aria-label="Period" style="display:inline-flex;padding:3px;gap:2px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)">
+        <sc-for list="{{periods}}" as="pe" hint-placeholder-count="3"><button type="button" class="{{pe.cls}}" onClick="{{pe.pick}}">{{pe.label}}</button></sc-for>
+      </div>
+      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok)"></span>Updated 4 min ago</span>
+    </div>
+
+    <main style="padding:22px 28px 40px;display:flex;flex-direction:column;gap:16px;max-width:1480px;box-sizing:border-box;width:100%">
+
+      <!-- ======================= OVERVIEW ======================= -->
+      <sc-if value="{{is.overview}}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <!-- HERO -->
+          <section class="card" data-note="7" style="flex:2 1 600px;padding:22px;display:flex;flex-wrap:wrap;gap:24px">
+            <div style="flex:1 1 220px;max-width:280px;display:flex;flex-direction:column">
+              <div style="font-size:14px;font-weight:500;color:var(--ink2)">On-shelf availability</div>
+              <div class="tnum" style="font-size:60px;font-weight:700;letter-spacing:-.03em;line-height:1;margin:14px 0 10px">{{hero.value}}<span style="font-size:26px;color:var(--muted);font-weight:500">%</span></div>
+              <div style="font-size:13.5px;color:var(--muted)"><span style="color:var(--critInk);font-weight:600">Down 3 points</span> from {{hero.prev}}% last week. You're 4th of 5 brands.</div>
+              <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:16px 12px;margin-top:auto;padding-top:18px;border-top:1px solid var(--line)">
+                <div><div style="font-size:12.5px;color:var(--subtle)">Products in stock</div><div class="tnum" style="font-size:18px;font-weight:600;margin-top:3px">29 <span style="font-size:13px;color:var(--subtle);font-weight:500">of 34</span></div></div>
+                <div><div style="font-size:12.5px;color:var(--subtle)">Behind Real</div><div class="tnum" style="font-size:18px;font-weight:600;margin-top:3px;color:var(--critInk)">7 points</div></div>
+                <div><div style="font-size:12.5px;color:var(--subtle)">Hours off shelf</div><div class="tnum" style="font-size:18px;font-weight:600;margin-top:3px">29 hrs <span class="d-bad" style="font-size:12.5px;font-weight:500">up 6.5</span></div></div>
+                <div><div style="font-size:12.5px;color:var(--subtle)">Average outage</div><div class="tnum" style="font-size:18px;font-weight:600;margin-top:3px">2 hr 39 min</div></div>
+              </div>
+            </div>
+            <div data-note="8" style="flex:3 1 360px;min-width:0;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center">
+                <span style="font-size:14px;font-weight:500;color:var(--ink2)">Availability over the last 7 days</span>
+                <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)">
+                  <sc-for list="{{legend}}" as="lg" hint-placeholder-count="5"><span style="display:inline-flex;align-items:center;gap:6px"><span style="{{lg.sw}}"></span>{{lg.name}}</span></sc-for>
+                </div>
+              </div>
+              <svg viewBox="0 0 640 260" role="img" aria-label="Seven-day availability trend, your brand versus four competitors" style="width:100%;height:auto;display:block">
+                <defs><linearGradient id="spArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--brand);stop-opacity:.26"></stop><stop offset="1" style="stop-color:var(--brand);stop-opacity:0"></stop></linearGradient></defs>
+                <sc-for list="{{trend.grid}}" as="g" hint-placeholder-count="6">
+                  <line x1="38" x2="630" y1="{{g.y}}" y2="{{g.y}}" class="gl"></line>
+                  <text x="30" y="{{g.ty}}" class="axis" style="text-anchor:end">{{g.label}}</text>
+                </sc-for>
+                <sc-for list="{{trend.xs}}" as="xl" hint-placeholder-count="7">
+                  <text x="{{xl.x}}" y="254" class="axis" style="text-anchor:middle">{{xl.label}}</text>
+                </sc-for>
+                <path d="{{trend.area}}" style="fill:url(#spArea)"></path>
+                <sc-for list="{{trend.comps}}" as="cl" hint-placeholder-count="4">
+                  <path d="{{cl.d}}" class="ln" style="{{cl.style}}"></path>
+                </sc-for>
+                <path d="{{trend.own}}" class="lnown"></path>
+                <circle cx="{{trend.lastX}}" cy="{{trend.lastY}}" r="5" style="fill:var(--surface);stroke:var(--brand);stroke-width:2.5"></circle>
+              </svg>
+            </div>
+          </section>
+
+          <!-- INVENTORY SHARE -->
+          <section class="card" data-note="9" style="flex:1 1 320px;padding:20px;display:flex;flex-direction:column">
+            <h2 style="margin:0;font-size:15px;font-weight:600">Stock on shelf in Delhi NCR</h2>
+            <p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Units across 5 dark stores at the last check</p>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:16px"><span class="tnum" style="font-size:28px;font-weight:700">4,410</span><span style="font-size:13px;color:var(--subtle)">juice units in total</span></div>
+            <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:10px 0 14px">
+              <sc-for list="{{inv.segs}}" as="sg" hint-placeholder-count="5"><span style="{{sg.style}}"></span></sc-for>
+            </div>
+            <div class="th" style="display:grid;grid-template-columns:12px minmax(0, 1fr) 60px 48px 52px;gap:10px;padding-bottom:6px"><span></span><span>Brand</span><span style="text-align:right">Units</span><span style="text-align:right">Share</span><span style="text-align:right">Week</span></div>
+            <sc-for list="{{inv.rows}}" as="ir" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:12px minmax(0, 1fr) 60px 48px 52px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px">
+                <span style="{{ir.sw}}"></span>
+                <span style="{{ir.nameStyle}}">{{ir.name}}</span>
+                <span class="mono" style="text-align:right;color:var(--ink2)">{{ir.units}}</span>
+                <span class="mono" style="text-align:right;color:var(--ink2)">{{ir.share}}</span>
+                <span class="{{ir.dCls}}" style="text-align:right">{{ir.delta}}</span>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+
+        <!-- KPI TILES -->
+        <section aria-label="Key metrics" data-note="10" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:16px">
+          <sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+            <div class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)">{{t.label}}</div>
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+                <div class="tnum" style="font-size:30px;font-weight:600;letter-spacing:-.04em;line-height:1">{{t.value}}<span style="font-size:13px;color:var(--subtle);font-weight:500;letter-spacing:0;margin-left:5px">{{t.unit}}</span></div>
+                <svg viewBox="0 0 96 36" aria-hidden="true" style="width:96px;height:36px;flex:none"><path d="{{t.area}}" style="{{t.areaStyle}}"></path><path d="{{t.line}}" class="sk" style="{{t.lineStyle}}"></path></svg>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--subtle);flex-wrap:wrap"><span class="{{t.dCls}}">{{t.delta}}</span>{{t.sub}}</div>
+            </div>
+          </sc-for>
+        </section>
+
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <!-- HEATMAP -->
+          <section class="card" data-note="11" style="flex:2 1 600px;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px 0">
+              <div><h2 style="margin:0;font-size:15px;font-weight:600">Availability by dark store</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Click a store to see what's missing there. Your brand is outlined.</p></div>
+              <div style="display:flex;gap:12px;font-size:12px;color:var(--muted);flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--ok)"></span>≥ 90%</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--warn)"></span>80–89%</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--crit)"></span>&lt; 80%</span>
+              </div>
+            </div>
+            <div style="overflow-x:auto;padding:14px 16px 18px">
+              <div style="min-width:700px;display:flex;flex-direction:column;gap:4px">
+                <div style="display:grid;grid-template-columns:minmax(150px, 1.3fr) repeat(5, minmax(76px, 1fr)) 100px;gap:4px;padding:0 4px 4px">
+                  <span class="th">Dark store</span>
+                  <sc-for list="{{hm.cols}}" as="hc" hint-placeholder-count="5"><span class="th" style="{{hc.style}}">{{hc.name}}</span></sc-for>
+                  <span class="th" style="padding-left:6px">Status</span>
+                </div>
+                <sc-for list="{{hm.rows}}" as="hr" hint-placeholder-count="5">
+                  <button type="button" class="rowbtn" onClick="{{hr.open}}" aria-label="{{hr.aria}}">
+                    <span style="display:grid;grid-template-columns:minmax(150px, 1.3fr) repeat(5, minmax(76px, 1fr)) 100px;gap:4px;align-items:center;padding:0 4px">
+                      <span><span class="hmname" style="display:block;font-size:13px;font-weight:500">{{hr.name}}</span><span style="font-size:12px;color:var(--subtle)">{{hr.meta}}</span></span>
+                      <sc-for list="{{hr.cells}}" as="c" hint-placeholder-count="5"><span class="{{c.cls}}">{{c.v}}</span></sc-for>
+                      <span style="padding-left:6px"><span class="{{hr.bCls}}"><span class="dot"></span>{{hr.status}}</span></span>
+                    </span>
+                  </button>
+                </sc-for>
+                <div style="display:grid;grid-template-columns:minmax(150px, 1.3fr) repeat(5, minmax(76px, 1fr)) 100px;gap:4px;align-items:center;padding:0 4px">
+                  <span><span style="display:block;font-size:13px;font-weight:500">Average</span><span style="font-size:12px;color:var(--subtle)">All 5 stores</span></span>
+                  <sc-for list="{{hm.avg}}" as="c" hint-placeholder-count="5"><span class="{{c.cls}}">{{c.v}}</span></sc-for>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- NEEDS ATTENTION -->
+          <section class="card" data-note="12" style="flex:1 1 320px;display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:18px 20px 12px">
+              <div><h2 style="margin:0;font-size:15px;font-weight:600">Needs your attention</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Most urgent first</p></div>
+              <span class="badge b-crit">4 to do</span>
+            </div>
+            <sc-for list="{{attention}}" as="a" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:30px minmax(0, 1fr) auto;gap:12px;align-items:start;padding:13px 20px;border-top:1px solid var(--line)">
+                <span style="{{a.icStyle}}"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg></span>
+                <div><div style="font-size:13px;font-weight:500">{{a.title}}</div><div style="font-size:12px;color:var(--subtle);margin-top:2px">{{a.meta}}</div></div>
+                <button type="button" class="btn btns" onClick="{{a.open}}">{{a.cta}}</button>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <!-- OOS NOW -->
+          <section class="card" data-note="13" style="flex:2 1 600px;display:flex;flex-direction:column;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:18px 20px 14px">
+              <div><h2 style="margin:0;font-size:15px;font-weight:600">Out of stock right now</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Your products, longest outage first, and whether a nearby store has them</p></div>
+              <button type="button" onClick="{{go.stock}}" style="border:0;background:none;color:var(--brandInk);font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap">View all →</button>
+            </div>
+            <div style="overflow-x:auto"><div style="min-width:560px">
+              <div class="thead" style="grid-template-columns:minmax(150px, 1.4fr) minmax(110px, 1fr) 104px minmax(170px, 1.2fr)"><span class="th">Product</span><span class="th">Dark store</span><span class="th" style="text-align:right">Out for</span><span class="th">Nearby stores</span></div>
+              <sc-for list="{{oos}}" as="o" hint-placeholder-count="5">
+                <div class="trow" style="grid-template-columns:minmax(150px, 1.4fr) minmax(110px, 1fr) 104px minmax(170px, 1.2fr)">
+                  <span><span style="display:block;font-weight:500;color:var(--ink)">{{o.sku}}</span><span style="font-size:12.5px;color:var(--subtle)">{{o.pack}}, {{o.mrp}}</span></span>
+                  <span>{{o.store}}</span>
+                  <span class="mono" style="text-align:right;color:var(--ink)">{{o.dur}}</span>
+                  <span><span class="{{o.nCls}}"><span class="dot"></span>{{o.near}}</span></span>
+                </div>
+              </sc-for>
+            </div></div>
+          </section>
+
+          <!-- MAP -->
+          <section class="card" data-note="14" style="flex:1 1 320px;padding:18px 20px 16px;display:flex;flex-direction:column;gap:12px">
+            <div><h2 style="margin:0;font-size:15px;font-weight:600">Store health</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">How your brand is doing at each store</p></div>
+            <div style="position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--mapBg)">
+              <svg viewBox="0 0 320 190" role="img" aria-label="Schematic map of 5 dark stores in Delhi NCR" style="width:100%;height:auto;display:block">
+                <path d="M0 58 C80 48 140 88 320 68" style="fill:none;stroke:var(--road);stroke-width:7;stroke-linecap:round"></path>
+                <path d="M150 0 C140 66 120 130 92 190" style="fill:none;stroke:var(--road);stroke-width:7;stroke-linecap:round"></path>
+                <path d="M30 116 C120 124 220 134 320 144" style="fill:none;stroke:var(--road);stroke-width:5;stroke-linecap:round"></path>
+                <path d="M210 0 C220 58 236 124 262 190" style="fill:none;stroke:var(--river);stroke-width:10;stroke-linecap:round"></path>
+                <sc-for list="{{pins}}" as="p" hint-placeholder-count="5">
+                  <g onClick="{{p.open}}" style="cursor:pointer">
+                    <circle cx="{{p.x}}" cy="{{p.y}}" r="15" style="{{p.halo}}"></circle>
+                    <circle cx="{{p.x}}" cy="{{p.y}}" r="6" style="{{p.core}}"></circle>
+                    <text x="{{p.tx}}" y="{{p.ty}}" class="pinlbl" style="{{p.anchor}}">{{p.name}}</text>
+                  </g>
+                </sc-for>
+              </svg>
+              <span style="position:absolute;left:10px;bottom:8px;font-size:11.5px;color:var(--subtle)">Not to scale</span>
+            </div>
+            <div>
+              <sc-for list="{{storeList}}" as="sl" hint-placeholder-count="5">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13px">
+                  <span>{{sl.name}} <span style="color:var(--subtle)">{{sl.city}}</span></span>
+                  <span style="display:flex;gap:10px;align-items:center"><span class="mono">{{sl.pct}}</span><span class="{{sl.bCls}}"><span class="dot"></span>{{sl.status}}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ======================= STOCK-OUTS ======================= -->
+      <sc-if value="{{is.stock}}" hint-placeholder-val="{{ false }}">
+      <div data-note="16" style="display:flex;flex-direction:column;gap:16px">
+        <section class="card" style="overflow:hidden">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px 14px">
+            <div><h2 style="margin:0;font-size:15px;font-weight:600">Your products that are out of stock</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle);max-width:640px">When the nearest store runs out, one close by often still has stock. We check up to 3 neighbouring stores for every product.</p></div>
+            <div style="display:flex;gap:8px"><button type="button" class="btn">Download CSV</button><button type="button" class="btn btnp">Check nearby stores</button></div>
+          </div>
+          <div style="overflow-x:auto"><div style="min-width:900px">
+            <div class="thead" style="grid-template-columns:minmax(150px, 1.3fr) 120px 80px 104px 80px minmax(160px, 1.2fr) minmax(140px, 1fr)"><span class="th">Product</span><span class="th">Dark store</span><span class="th">Since</span><span class="th" style="text-align:right">Out for</span><span class="th" style="text-align:right">This week</span><span class="th">Nearby stores</span><span class="th">Competitor in stock</span></div>
+            <sc-for list="{{oos}}" as="o" hint-placeholder-count="5">
+              <div class="trow" style="grid-template-columns:minmax(150px, 1.3fr) 120px 80px 104px 80px minmax(160px, 1.2fr) minmax(140px, 1fr)">
+                <span><span style="display:block;font-weight:500;color:var(--ink)">{{o.sku}}</span><span style="font-size:12.5px;color:var(--subtle)">{{o.pack}}, {{o.mrp}}</span></span>
+                <span>{{o.store}}</span><span class="mono">{{o.since}}</span>
+                <span class="mono" style="text-align:right;color:var(--ink)">{{o.dur}}</span><span class="mono" style="text-align:right">{{o.ev}}</span>
+                <span><span class="{{o.nCls}}"><span class="dot"></span>{{o.near}}</span></span><span>{{o.comp}}</span>
+              </div>
+            </sc-for>
+          </div></div>
+        </section>
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <section class="card" style="flex:3 1 480px;padding:18px 20px 20px">
+            <h2 style="margin:0;font-size:15px;font-weight:600">Hours off the shelf</h2><p style="margin:3px 0 16px;font-size:13px;color:var(--subtle)">Products that ran out at least once in the last 7 days</p>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{offenders}}" as="f" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:150px minmax(0, 1fr) 70px;gap:12px;align-items:center">
+                  <span style="font-size:13px;color:var(--ink2)">{{f.label}}</span>
+                  <span style="height:20px;background:var(--surface3);border-radius:6px;overflow:hidden"><span style="{{f.style}}"></span></span>
+                  <span class="mono" style="font-size:13px;text-align:right">{{f.v}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+          <section class="card" style="flex:2 1 360px;padding:18px 20px 20px">
+            <h2 style="margin:0;font-size:15px;font-weight:600">Stock-outs by store</h2><p style="margin:3px 0 16px;font-size:13px;color:var(--subtle)">How many times your products ran out this week</p>
+            <div style="display:flex;align-items:flex-end;gap:14px;height:200px;border-bottom:1px solid var(--line);padding:0 6px">
+              <sc-for list="{{events}}" as="e" hint-placeholder-count="5">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%">
+                  <span class="mono" style="font-size:12px;color:var(--ink2)">{{e.v}}</span>
+                  <span style="{{e.style}}"></span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:14px;padding:8px 6px 0">
+              <sc-for list="{{events}}" as="e" hint-placeholder-count="5"><span style="flex:1;text-align:center;font-size:11.5px;color:var(--subtle)">{{e.label}}</span></sc-for>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ======================= COMPETITION ======================= -->
+      <sc-if value="{{is.comp}}" hint-placeholder-val="{{ false }}">
+      <div data-note="17" style="display:flex;flex-direction:column;gap:16px">
+        <section class="card" style="padding:18px 20px 20px">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div><h2 style="margin:0;font-size:15px;font-weight:600">Availability by store and brand</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Each group is one dark store. The scale starts at 60%.</p></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)">
+              <sc-for list="{{legend}}" as="lg" hint-placeholder-count="5"><span style="display:inline-flex;align-items:center;gap:6px"><span style="{{lg.sw}}"></span>{{lg.name}}</span></sc-for>
+            </div>
+          </div>
+          <div style="overflow-x:auto"><div style="min-width:640px">
+            <div style="display:flex;gap:28px;height:280px;align-items:flex-end;margin-top:20px;border-bottom:1px solid var(--line);padding:0 8px;background:repeating-linear-gradient(to top, var(--grid) 0 1px, transparent 1px 70px)">
+              <sc-for list="{{groups}}" as="gr" hint-placeholder-count="5">
+                <div style="flex:1;display:flex;gap:4px;align-items:flex-end;height:100%">
+                  <sc-for list="{{gr.bars}}" as="b" hint-placeholder-count="5"><span title="{{b.title}}" style="{{b.style}}"></span></sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:28px;padding:8px 8px 0">
+              <sc-for list="{{groups}}" as="gr" hint-placeholder-count="5"><span style="flex:1;text-align:center;font-size:12px;color:var(--ink2)">{{gr.store}}</span></sc-for>
+            </div>
+          </div></div>
+        </section>
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <section class="card" style="flex:3 1 540px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:18px 20px 14px"><div><h2 style="margin:0;font-size:15px;font-weight:600">How brands compare</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Every brand we track on {{platform}} in Delhi NCR</p></div><button type="button" class="btn">Download CSV</button></div>
+            <div style="overflow-x:auto"><div style="min-width:600px">
+              <div class="thead" style="grid-template-columns:minmax(150px, 1.2fr) minmax(170px, 1.5fr) 56px 84px 48px 44px"><span class="th">Brand</span><span class="th">Availability</span><span class="th" style="text-align:right">Week</span><span class="th" style="text-align:right">vs you</span><span class="th" style="text-align:right">Items</span><span class="th" style="text-align:right">Out</span></div>
+              <sc-for list="{{bench}}" as="b" hint-placeholder-count="5">
+                <div class="trow" style="grid-template-columns:minmax(150px, 1.2fr) minmax(170px, 1.5fr) 56px 84px 48px 44px">
+                  <span style="display:flex;align-items:center;gap:8px;white-space:nowrap"><span style="{{b.sw}}"></span><span style="{{b.nameStyle}}">{{b.name}}</span><sc-if value="{{b.own}}" hint-placeholder-val="{{ false }}"><span class="badge b-brand" style="height:18px;font-size:11px">You</span></sc-if></span>
+                  <span style="display:flex;align-items:center;gap:10px"><span class="track"><span style="{{b.fill}}"></span></span><span class="mono" style="width:36px;text-align:right;color:var(--ink)">{{b.pct}}</span></span>
+                  <span class="{{b.cCls}}" style="text-align:right">{{b.change}}</span>
+                  <span class="{{b.dCls}}" style="text-align:right">{{b.delta}}</span>
+                  <span class="mono" style="text-align:right">{{b.skus}}</span><span class="mono" style="text-align:right">{{b.oos}}</span>
+                </div>
+              </sc-for>
+            </div></div>
+          </section>
+          <section class="card" style="flex:2 1 360px;overflow:hidden">
+            <div style="padding:18px 20px 14px"><h2 style="margin:0;font-size:15px;font-weight:600">Where competitors ran out</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Good moments to push your own product</p></div>
+            <div class="thead" style="grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr)"><span class="th">Their product</span><span class="th">Store</span><span class="th">Your option</span></div>
+            <div class="trow" style="grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr)"><span><span style="display:block;font-weight:500;color:var(--ink)">Real Mixed Fruit</span><span style="font-size:12.5px;color:var(--subtle)">1 L, out for 2 hrs</span></span><span>Lajpat Nagar</span><span><span class="badge b-ok"><span class="dot"></span>Mixed Fruit 1 L</span></span></div>
+            <div class="trow" style="grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr)"><span><span style="display:block;font-weight:500;color:var(--ink)">Tropicana Orange Delight</span><span style="font-size:12.5px;color:var(--subtle)">1 L, out for 2 hrs</span></span><span>Sohna Road</span><span><span class="badge b-neutral">Nothing similar</span></span></div>
+            <div class="trow" style="grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr)"><span><span style="display:block;font-weight:500;color:var(--ink)">B Natural Guava</span><span style="font-size:12.5px;color:var(--subtle)">1 L, out for 45 min</span></span><span>Saket</span><span><span class="badge b-ok"><span class="dot"></span>Guava Twist</span></span></div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ======================= FORECAST ======================= -->
+      <sc-if value="{{is.fore}}" hint-placeholder-val="{{ false }}">
+        <section class="card" data-note="18" style="overflow:hidden">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px 14px"><div><h2 style="margin:0;font-size:15px;font-weight:600">What runs out next</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Based on how fast stock dropped over the last 6 hours</p></div><span class="badge b-warn">Rough estimate</span></div>
+          <div style="overflow-x:auto"><div style="min-width:820px">
+            <div class="thead" style="grid-template-columns:minmax(140px, 1.2fr) 130px 80px 90px minmax(220px, 2fr) 140px"><span class="th">Product</span><span class="th">Dark store</span><span class="th" style="text-align:right">Units left</span><span class="th" style="text-align:right">Selling</span><span class="th">Time left</span><span class="th">What to do</span></div>
+            <sc-for list="{{forecast}}" as="f" hint-placeholder-count="4">
+              <div class="trow" style="grid-template-columns:minmax(140px, 1.2fr) 130px 80px 90px minmax(220px, 2fr) 140px">
+                <span><span style="display:block;font-weight:500;color:var(--ink)">{{f.sku}}</span><span style="font-size:12px;color:var(--subtle)">{{f.pack}}</span></span>
+                <span>{{f.store}}</span><span class="mono" style="text-align:right">{{f.u}}</span><span class="mono" style="text-align:right">{{f.rate}}</span>
+                <span style="display:flex;align-items:center;gap:10px"><span class="track"><span style="{{f.fill}}"></span></span><span class="mono" style="width:60px;text-align:right;color:var(--ink)">{{f.h}}</span></span>
+                <span><span class="{{f.bCls}}"><span class="dot"></span>{{f.action}}</span></span>
+              </div>
+            </sc-for>
+          </div></div>
+        </section>
+      </sc-if>
+
+      <!-- ======================= ALERTS ======================= -->
+      <sc-if value="{{is.alerts}}" hint-placeholder-val="{{ false }}">
+        <section class="card" data-note="19" style="overflow:hidden">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 20px 14px"><div><h2 style="margin:0;font-size:15px;font-weight:600">Today's alerts</h2><p style="margin:3px 0 0;font-size:13px;color:var(--subtle)">Everything we flagged today. These can go out by email, Slack or WhatsApp.</p></div><button type="button" class="btn">Download CSV</button></div>
+          <div role="group" aria-label="Filter alerts" style="display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 14px">
+            <sc-for list="{{alertChips}}" as="ch" hint-placeholder-count="7"><button type="button" class="{{ch.cls}}" onClick="{{ch.pick}}">{{ch.label}}</button></sc-for>
+          </div>
+          <sc-for list="{{alertsShown}}" as="al" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:56px 140px minmax(0, 1fr) auto;gap:16px;align-items:center;padding:13px 20px;border-top:1px solid var(--line);font-size:13px">
+              <span class="mono" style="color:var(--subtle)">{{al.t}}</span>
+              <span><span class="{{al.bCls}}"><span class="dot"></span>{{al.k}}</span></span>
+              <span>{{al.x}}</span>
+              <button type="button" class="btn btns">View</button>
+            </div>
+          </sc-for>
+        </section>
+      </sc-if>
+
+      <p data-note="20" style="font-size:12.5px;color:var(--subtle);border-top:1px solid var(--line);padding-top:14px;margin:6px 0 0;line-height:1.55">The numbers here are sample data. In this demo, {{platform}} stock is read from an unofficial source. For real use we'd need a licensed data partner or an agreement with the platform.</p>
+    </main>
+  </div>
+</div>
+
+<!-- ================= STORE DRILL-DOWN DRAWER ================= -->
+<sc-if value="{{drawer.show}}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;display:flex;justify-content:flex-end;z-index:50">
+    <button type="button" aria-label="Close store panel" onClick="{{drawer.close}}" style="position:absolute;inset:0;border:0;background:var(--scrim);cursor:pointer"></button>
+    <aside aria-label="Store details" data-note="15" style="position:relative;width:420px;max-width:100%;height:100%;min-height:100vh;box-sizing:border-box;background:var(--surface);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(16,24,40,.12);display:flex;flex-direction:column;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:1px solid var(--line)">
+        <div>
+          <div style="font-size:13px;color:var(--subtle)">Dark store in {{drawer.city}}</div>
+          <h2 style="margin:4px 0 8px;font-size:22px;font-weight:700">{{drawer.name}}</h2>
+          <span class="{{drawer.bCls}}"><span class="dot"></span>{{drawer.status}}</span>
+        </div>
+        <button type="button" class="btn" aria-label="Close" onClick="{{drawer.close}}" style="width:36px;padding:0;justify-content:center"><svg class="ic ics" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)">
+        <div style="background:var(--surface);padding:14px 22px"><div style="font-size:12px;color:var(--subtle)">Your availability</div><div class="tnum" style="font-size:22px;font-weight:600;margin-top:4px">{{drawer.own}}</div></div>
+        <div style="background:var(--surface);padding:14px 22px"><div style="font-size:12px;color:var(--subtle)">Out of stock</div><div class="tnum" style="font-size:22px;font-weight:600;margin-top:4px">{{drawer.oosCount}}</div></div>
+        <div style="background:var(--surface);padding:14px 22px"><div style="font-size:12px;color:var(--subtle)">Your rank here</div><div class="tnum" style="font-size:22px;font-weight:600;margin-top:4px">{{drawer.rank}}</div></div>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line)">
+        <div class="th">Availability at this store</div>
+        <sc-for list="{{drawer.bars}}" as="db" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:110px minmax(0, 1fr) 40px;gap:10px;align-items:center;font-size:13px">
+            <span style="{{db.nameStyle}}">{{db.name}}</span>
+            <span class="track"><span style="{{db.fill}}"></span></span>
+            <span class="mono" style="text-align:right">{{db.pct}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:4px">
+        <div class="th" style="margin-bottom:6px">Your products out of stock here</div>
+        <sc-if value="{{drawer.hasOos}}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{drawer.oos}}" as="o" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px">
+              <span><span style="display:block;font-weight:500">{{o.sku}} {{o.pack}}</span><span style="font-size:12.5px;color:var(--subtle)">Out for {{o.dur}}</span></span>
+              <span class="{{o.nCls}}"><span class="dot"></span>{{o.near}}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{drawer.noOos}}" hint-placeholder-val="{{ false }}">
+          <div style="padding:12px;border-radius:10px;background:var(--okBg);color:var(--okInk);font-size:13px">No stock-outs for your brand at this store right now.</div>
+        </sc-if>
+      </div>
+    </aside>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Look"},"accent":{"editor":"color","options":["#6E5BFF","#2563EB","#0D9488","#E04F16"],"default":"#6E5BFF","section":"Look"},"$preview":{"width":1440,"height":1960}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'overview', theme: null, alertType: 'All', store: -1, platform: 'Blinkit', period: '7D', notes: false };
+  }
+
+  renderVals() {
+    var self = this, s = this.state;
+    var theme = s.theme || this.props.theme || 'light';
+    var accent = this.props.accent || '#6E5BFF';
+    var brandVar = theme === 'dark' && accent === '#6E5BFF' ? '#8B7BFF' : accent;
+
+    var BRANDS = [
+      { n: 'Paper Boat', c: 'var(--brand)' }, { n: 'Real', c: 'var(--real)' }, { n: 'Raw Pressery', c: 'var(--raw)' },
+      { n: 'B Natural', c: 'var(--bn)' }, { n: 'Tropicana', c: 'var(--trop)' }
+    ];
+    var DAYS = ['27 Oct', '28 Oct', '29 Oct', '30 Oct', '31 Oct', '1 Nov', '2 Nov'];
+    var TREND = [[91, 90, 89, 90, 88, 89, 86], [93, 94, 92, 93, 94, 93, 93], [90, 91, 92, 90, 91, 92, 91], [87, 88, 89, 88, 87, 88, 88], [82, 80, 81, 79, 80, 78, 79]];
+    var STORES = [
+      { n: 'Sohna Road', c: 'Gurgaon', v: [94, 96, 92, 90, 82], x: 118, y: 162, tx: 132, ty: 166, a: 'start' },
+      { n: 'Lajpat Nagar', c: 'New Delhi', v: [82, 91, 93, 88, 76], x: 188, y: 66, tx: 188, ty: 50, a: 'middle' },
+      { n: 'DLF Phase 3', c: 'Gurgaon', v: [88, 95, 90, 86, 80], x: 56, y: 112, tx: 56, ty: 134, a: 'middle' },
+      { n: 'Saket', c: 'New Delhi', v: [79, 92, 89, 87, 77], x: 140, y: 100, tx: 126, ty: 104, a: 'end' },
+      { n: 'Sector 18', c: 'Noida', v: [87, 91, 91, 89, 80], x: 268, y: 92, tx: 268, ty: 114, a: 'middle' }
+    ];
+    var OOS = [
+      { sku: 'Kala Khatta', pack: '200 ml', mrp: '₹30', store: 'Saket', since: '9:50 am', mins: 230, ev: '2 times', nt: 'ok', near: '4 at store 49971', comp: 'Real Jamun' },
+      { sku: 'Aam Panna', pack: '200 ml', mrp: '₹30', store: 'Lajpat Nagar', since: '10:15 am', mins: 205, ev: '3 times', nt: 'crit', near: 'Out nearby too', comp: 'None' },
+      { sku: 'Alphonso Mango', pack: '1 L', mrp: '₹99', store: 'Lajpat Nagar', since: '11:38 am', mins: 122, ev: 'Once', nt: 'crit', near: 'May be delisted', comp: 'Real Mango' },
+      { sku: 'Aamras', pack: '200 ml', mrp: '₹30', store: 'Sohna Road', since: '11:42 am', mins: 118, ev: '4 times', nt: 'ok', near: '6 at store 31719', comp: 'Real Mixed Fruit' },
+      { sku: 'Jaljeera', pack: '250 ml', mrp: '₹35', store: 'Sohna Road', since: '11:42 am', mins: 118, ev: '2 times', nt: 'neutral', near: 'Not sold nearby', comp: 'B Natural' }
+    ];
+    var BENCH = [
+      { i: 1, a: 93, p: 92, skus: 22, oos: 1 }, { i: 2, a: 91, p: 90, skus: 28, oos: 2 }, { i: 3, a: 88, p: 88, skus: 12, oos: 1 },
+      { i: 0, a: 86, p: 89, skus: 34, oos: 5 }, { i: 4, a: 79, p: 81, skus: 15, oos: 3 }
+    ];
+    var INV = [{ i: 0, u: 1240, d: -6 }, { i: 2, u: 1110, d: 3 }, { i: 1, u: 980, d: 4 }, { i: 4, u: 660, d: -2 }, { i: 3, u: 420, d: 1 }];
+    var FORE = [
+      { sku: 'Kala Khatta', pack: '200 ml', store: 'Sohna Road', u: 3, r: 1.2, h: 2.5 },
+      { sku: 'Jamun', pack: '200 ml', store: 'Lajpat Nagar', u: 5, r: 0.8, h: 6.0 },
+      { sku: 'Litchi', pack: '200 ml', store: 'DLF Phase 3', u: 9, r: 0.9, h: 10.0 },
+      { sku: 'Coconut Water', pack: '200 ml', store: 'Saket', u: 12, r: 0.7, h: 17.1 }
+    ];
+    var ALERTS = [
+      { t: '11:42 am', k: 'Out of stock', x: 'Aamras 200 ml ran out at Sohna Road.' },
+      { t: '11:42 am', k: 'Running low', x: 'Only 2 Jaljeera 250 ml left at Sohna Road.' },
+      { t: '11:40 am', k: 'New product', x: 'Guava Twist 200 ml is now listed at Lajpat Nagar.' },
+      { t: '11:38 am', k: 'Delisted', x: 'Alphonso Mango 1 L has disappeared from the Lajpat Nagar listing.' },
+      { t: '11:35 am', k: 'Competitor gap', x: 'Real has Mixed Fruit 1 L at Sohna Road, but yours is sold out.' },
+      { t: '10:58 am', k: 'Back in stock', x: 'Litchi 200 ml is back at Sohna Road.' }
+    ];
+    var ATONE = { 'Out of stock': 'crit', 'Delisted': 'crit', 'Running low': 'warn', 'Competitor gap': 'warn', 'New product': 'info', 'Back in stock': 'ok' };
+
+    function band(v) { return v >= 90 ? 'ok' : (v >= 80 ? 'warn' : 'crit'); }
+    var LBL = { ok: 'Healthy', warn: 'Watch', crit: 'Critical' };
+    function badge(t) { return 'badge b-' + t; }
+    function sw(c) { return 'width:8px;height:8px;border-radius:2px;flex:none;display:inline-block;background:' + c; }
+    function dur(m) { var h = Math.floor(m / 60), mm = m % 60; return h + ' hr ' + mm + ' min'; }
+    function go(t) { return function () { self.setState({ tab: t }); }; }
+    function openStore(i) { return function () { self.setState({ store: i }); }; }
+    function smooth(pts) {
+      var d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+      for (var i = 0; i < pts.length - 1; i++) {
+        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+        var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+        d += ' C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+      }
+      return d;
+    }
+
+    // ---- nav ----
+    var tabs = ['overview', 'stock', 'comp', 'fore', 'alerts'], nav = {}, is = {}, goMap = {};
+    tabs.forEach(function (t) { nav[t] = s.tab === t ? 'nav on' : 'nav'; is[t] = s.tab === t; goMap[t] = go(t); });
+    var TITLES = { overview: ['Overview', 'How your shelf looks today'], stock: ['Stock-outs', "What's out of stock"], comp: ['Competition', 'You vs other brands'], fore: ['Forecast', 'What runs out next'], alerts: ['Alerts', 'Alerts'] };
+
+    var platforms = ['Blinkit', 'Zepto', 'Instamart'].map(function (p) {
+      return { label: p, cls: s.platform === p ? 'seg on' : 'seg', pick: function () { self.setState({ platform: p }); } };
+    });
+    var periods = ['Today', '7D', '30D'].map(function (p) {
+      return { label: p, cls: s.period === p ? 'seg on' : 'seg', pick: function () { self.setState({ period: p }); } };
+    });
+    var feedBars = [70, 90, 80, 100, 85, 95, 75, 100, 90, 100, 88, 96].map(function (h) {
+      return { style: 'flex:1;border-radius:1px;background:var(--ok);opacity:.55;height:' + h + '%' };
+    });
+
+    // ---- trend chart (SVG, viewBox 640x260) ----
+    var L = 38, R = 630, T = 12, B = 232;
+    function X(i) { return L + i * (R - L) / 6; }
+    function Y(v) { return T + (100 - v) / 25 * (B - T); }
+    var grid = [100, 95, 90, 85, 80, 75].map(function (v) { return { y: Y(v).toFixed(1), ty: (Y(v) + 4).toFixed(1), label: v + '%' }; });
+    var xs = DAYS.map(function (d, i) { return { x: X(i).toFixed(1), label: d }; });
+    var ownPts = TREND[0].map(function (v, i) { return [X(i), Y(v)]; });
+    var ownD = smooth(ownPts);
+    var comps = [1, 2, 3, 4].map(function (bi) {
+      return { d: smooth(TREND[bi].map(function (v, i) { return [X(i), Y(v)]; })), style: 'stroke:' + BRANDS[bi].c + ';opacity:.9' };
+    });
+    var trend = {
+      grid: grid, xs: xs, own: ownD, comps: comps,
+      area: ownD + ' L' + R.toFixed(1) + ' ' + B + ' L' + L + ' ' + B + ' Z',
+      lastX: ownPts[6][0].toFixed(1), lastY: ownPts[6][1].toFixed(1)
+    };
+    var legend = BRANDS.map(function (b) { return { name: b.n, sw: sw(b.c) }; });
+
+    // ---- sparkline tiles ----
+    function spark(arr, color) {
+      var mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), rg = (mx - mn) || 1;
+      var pts = arr.map(function (v, i) { return [3 + i * 90 / (arr.length - 1), 31 - (v - mn) / rg * 26]; });
+      var line = smooth(pts);
+      return { line: line, area: line + ' L93 36 L3 36 Z', lineStyle: 'stroke:' + color, areaStyle: 'fill:' + color + ';opacity:.1' };
+    }
+    function tile(label, value, unit, delta, dCls, sub, arr, color) {
+      var sp = spark(arr, color);
+      return { label: label, value: value, unit: unit, delta: delta, dCls: dCls, sub: sub, line: sp.line, area: sp.area, lineStyle: sp.lineStyle, areaStyle: sp.areaStyle };
+    }
+    var tiles = [
+      tile('Out of stock right now', '5', 'of 34', '2 more', 'd-bad', 'than the last check', [2, 3, 2, 3, 3, 3, 5], 'var(--crit)'),
+      tile('Running out in 6 hours', '2', 'products', '', 'd-bad', 'Kala Khatta and Jamun', [0, 1, 1, 0, 1, 1, 2], 'var(--warn)'),
+      tile('Stock at nearby stores', '2', 'of 5', '10 units', 'd-good', 'ready to move', [1, 1, 2, 1, 2, 2, 2], 'var(--ok)'),
+      tile('Competitors out of stock', '7', 'products', '2 more', 'd-good', 'chances to win the shelf', [4, 5, 4, 6, 5, 6, 7], 'var(--brand)')
+    ];
+
+    // ---- inventory share ----
+    var total = 4410;
+    var inv = {
+      segs: INV.map(function (x) { return { style: 'display:block;height:100%;width:' + (x.u / total * 100).toFixed(1) + '%;background:' + BRANDS[x.i].c }; }),
+      rows: INV.map(function (x) {
+        return {
+          sw: sw(BRANDS[x.i].c), name: BRANDS[x.i].n + (x.i === 0 ? ' (you)' : ''),
+          nameStyle: 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (x.i === 0 ? 'font-weight:600;color:var(--ink)' : 'color:var(--ink2)'),
+          units: x.u.toLocaleString('en-IN'), share: Math.round(x.u / total * 100) + '%',
+          delta: (x.d < 0 ? '−' : '+') + Math.abs(x.d) + '%', dCls: 'mono ' + (x.d < 0 ? 'd-bad' : 'd-good')
+        };
+      })
+    };
+
+    // ---- heatmap ----
+    var hm = {
+      cols: BRANDS.map(function (b, i) { return { name: b.n, style: 'text-align:center;white-space:nowrap;' + (i === 0 ? 'color:var(--brandInk)' : '') }; }),
+      rows: STORES.map(function (st, si) {
+        var t = band(st.v[0]);
+        var oosN = OOS.filter(function (o) { return o.store === st.n; }).length;
+        return {
+          name: st.n, meta: st.c + ', ' + (oosN ? oosN + ' out of stock' : 'nothing missing'), status: LBL[t], bCls: badge(t), open: openStore(si),
+          aria: 'Open details for ' + st.n,
+          cells: st.v.map(function (v, i) { return { v: v + '%', cls: 'hc h-' + band(v) + (i === 0 ? ' own' : '') }; })
+        };
+      }),
+      avg: BRANDS.map(function (b, i) {
+        var a = Math.round(STORES.reduce(function (t, x) { return t + x.v[i]; }, 0) / STORES.length);
+        return { v: a + '%', cls: 'hc h-avg' + (i === 0 ? ' own' : '') };
+      })
+    };
+
+    // ---- map + store list ----
+    var PIN = { ok: 'var(--ok)', warn: 'var(--warn)', crit: 'var(--crit)' };
+    var pins = STORES.map(function (st, si) {
+      var t = band(st.v[0]);
+      return { x: st.x, y: st.y, tx: st.tx, ty: st.ty, name: st.n, anchor: 'text-anchor:' + st.a, open: openStore(si),
+        halo: 'fill:' + PIN[t] + ';opacity:.16', core: 'fill:' + PIN[t] + ';stroke:var(--mapBg);stroke-width:2.5' };
+    });
+    var storeList = STORES.slice().sort(function (a, b) { return a.v[0] - b.v[0]; }).map(function (st) {
+      var t = band(st.v[0]); return { name: st.n, city: st.c, pct: st.v[0] + '%', status: LBL[t], bCls: badge(t) };
+    });
+
+    // ---- OOS ----
+    var oos = OOS.map(function (o) {
+      return { sku: o.sku, pack: o.pack, mrp: o.mrp, store: o.store, since: o.since, dur: dur(o.mins), ev: o.ev, near: o.near, nCls: badge(o.nt), comp: o.comp };
+    });
+
+    // ---- attention ----
+    function att(tone, title, meta, cta, tab) {
+      var bg = { crit: 'var(--critBg)', warn: 'var(--warnBg)', brand: 'var(--brandSoft)' }[tone];
+      var fg = { crit: 'var(--crit)', warn: 'var(--warn)', brand: 'var(--brand)' }[tone];
+      return { title: title, meta: meta, cta: cta, open: go(tab), icStyle: 'width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:' + bg + ';color:' + fg };
+    }
+    var attention = [
+      att('crit', 'Aamras 200 ml is out at Sohna Road', 'Store 31719 nearby has 6 you could move over', 'Transfer', 'stock'),
+      att('warn', 'Kala Khatta will run out in about 2½ hours', '3 left at Sohna Road, selling about 1 an hour', 'Reorder', 'fore'),
+      att('brand', 'Real has stock where you don\'t', 'Their Mixed Fruit 1 L is on the shelf at Sohna Road', 'Compare', 'comp'),
+      att('crit', 'Alphonso Mango 1 L may have been delisted', 'Gone from the Lajpat Nagar listing since 11:38 am', 'Check', 'alerts')
+    ];
+
+    // ---- stock-outs charts ----
+    var offenders = [['Aamras 200 ml', 11.5], ['Aam Panna 200 ml', 8.0], ['Jaljeera 250 ml', 5.0], ['Kala Khatta 200 ml', 4.5]].map(function (f) {
+      return { label: f[0], v: f[1] + ' hrs', style: 'display:block;height:100%;border-radius:6px;background:var(--crit);width:' + (f[1] / 12 * 100).toFixed(1) + '%' };
+    });
+    var events = [['Sohna Rd', 6], ['Lajpat Ngr', 5], ['DLF Ph 3', 1], ['Saket', 3], ['Sector 18', 1]].map(function (e) {
+      return { label: e[0], v: e[1], style: 'display:block;width:100%;max-width:36px;border-radius:6px 6px 0 0;background:var(--brand);height:' + (e[1] / 6 * 82).toFixed(1) + '%' };
+    });
+
+    // ---- competition ----
+    var groups = STORES.map(function (st) {
+      return { store: st.n, bars: st.v.map(function (v, i) {
+        return { title: BRANDS[i].n + ' ' + v + '%', style: 'flex:1;border-radius:4px 4px 0 0;background:' + BRANDS[i].c + ';height:' + ((v - 60) / 40 * 100).toFixed(1) + '%' };
+      }) };
+    });
+    var bench = BENCH.map(function (r) {
+      var own = r.i === 0, d = r.a - 86, c = r.a - r.p;
+      return {
+        name: BRANDS[r.i].n, own: own, sw: sw(BRANDS[r.i].c), nameStyle: own ? 'font-weight:600;color:var(--ink)' : 'font-weight:500;color:var(--ink)',
+        pct: r.a + '%', fill: 'display:block;height:100%;border-radius:3px;width:' + r.a + '%;background:' + BRANDS[r.i].c,
+        change: c > 0 ? '+' + c : (c < 0 ? '−' + (-c) : 'same'), cCls: 'mono ' + (c > 0 ? 'd-good' : (c < 0 ? 'd-bad' : 'd-flat')),
+        delta: own ? '' : (d > 0 ? d + ' ahead' : (-d) + ' behind'), dCls: 'mono ' + (own ? 'd-flat' : (d > 0 ? 'd-bad' : 'd-good')),
+        skus: r.skus, oos: r.oos
+      };
+    });
+
+    // ---- forecast ----
+    var forecast = FORE.map(function (f) {
+      var t = f.h <= 6 ? 'crit' : (f.h <= 12 ? 'warn' : 'neutral');
+      var col = { crit: 'var(--crit)', warn: 'var(--warn)', neutral: 'var(--brand)' }[t];
+      return { sku: f.sku, pack: f.pack, store: f.store, u: f.u, rate: f.r + ' an hr', h: f.h + ' hrs',
+        fill: 'display:block;height:100%;border-radius:3px;background:' + col + ';width:' + Math.min(100, f.h / 24 * 100).toFixed(1) + '%',
+        bCls: badge(t), action: { crit: 'Reorder now', warn: 'Reorder today', neutral: 'On track' }[t] };
+    });
+
+    // ---- alerts ----
+    var types = ['All', 'Out of stock', 'Running low', 'Competitor gap', 'Delisted', 'New product', 'Back in stock'];
+    var alertChips = types.map(function (ty) {
+      var n = ty === 'All' ? ALERTS.length : ALERTS.filter(function (a) { return a.k === ty; }).length;
+      return { label: ty + ' (' + n + ')', cls: s.alertType === ty ? 'chip on' : 'chip', pick: function () { self.setState({ alertType: ty }); } };
+    });
+    var alertsShown = ALERTS.filter(function (a) { return s.alertType === 'All' || a.k === s.alertType; })
+      .map(function (a) { return { t: a.t, k: a.k, x: a.x, bCls: badge(ATONE[a.k]) }; });
+
+    // ---- drawer ----
+    var drawer = { show: s.store >= 0, close: function () { self.setState({ store: -1 }); } };
+    if (s.store >= 0) {
+      var st = STORES[s.store], t = band(st.v[0]);
+      var sOos = OOS.filter(function (o) { return o.store === st.n; });
+      var rank = st.v.slice().sort(function (a, b) { return b - a; }).indexOf(st.v[0]) + 1;
+      drawer.name = st.n; drawer.city = st.c; drawer.status = LBL[t]; drawer.bCls = badge(t);
+      drawer.own = st.v[0] + '%'; drawer.oosCount = String(sOos.length); drawer.rank = rank + ' of 5';
+      drawer.bars = st.v.map(function (v, i) { return { name: BRANDS[i].n, pct: v + '%', nameStyle: i === 0 ? 'font-weight:600' : 'color:var(--ink2)', fill: 'display:block;height:100%;border-radius:3px;width:' + v + '%;background:' + BRANDS[i].c }; })
+        .sort(function (a, b) { return parseInt(b.pct, 10) - parseInt(a.pct, 10); });
+      drawer.oos = sOos.map(function (o) { return { sku: o.sku, pack: o.pack, dur: dur(o.mins), near: o.near, nCls: badge(o.nt) }; });
+      drawer.hasOos = sOos.length > 0; drawer.noOos = sOos.length === 0;
+    }
+
+    return {
+      rootClass: (theme === 'dark' ? 'sp dark' : 'sp') + (s.notes ? ' annotate' : ''),
+      notesOn: !!s.notes, notesLabel: s.notes ? 'Hide changes' : 'Show changes', notesBtnCls: s.notes ? 'btn notes-on' : 'btn',
+      toggleNotes: function () { self.setState({ notes: !s.notes }); },
+      rootStyle: '--brand:' + brandVar + ';position:relative;min-height:100vh',
+      isDark: theme === 'dark', isLight: theme !== 'dark',
+      toggleTheme: function () { self.setState({ theme: theme === 'dark' ? 'light' : 'dark' }); },
+      nav: nav, is: is, go: goMap, crumb: TITLES[s.tab][0], pageTitle: TITLES[s.tab][1],
+      platform: s.platform, platforms: platforms, periods: periods, feedBars: feedBars,
+      hero: { value: '86', prev: '89' }, trend: trend, legend: legend, tiles: tiles, inv: inv,
+      hm: hm, pins: pins, storeList: storeList, oos: oos, attention: attention,
+      offenders: offenders, events: events, groups: groups, bench: bench, forecast: forecast,
+      alertChips: alertChips, alertsShown: alertsShown, drawer: drawer
+    };
+  }
+}
+</script>
+</body>
+</html>

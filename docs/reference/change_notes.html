@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shelf Pulse: what changed, old vs new</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F5F6F8}
+a{color:#4F3BDB}a:hover{color:#3A28B8}
+.cn{font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif;color:#0D0F12;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.cn h2{font-size:20px;font-weight:700;margin:0 0 4px}
+.cn h3{font-size:15px;font-weight:600;margin:20px 0 10px}
+.sec{background:#FFFFFF;border:1px solid #EAECF0;border-radius:16px;padding:24px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.lead{color:#475467;margin:0 0 16px;font-size:13.5px}
+.tw{overflow-x:auto;border:1px solid #EAECF0;border-radius:12px}
+.tw table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+.tw th{text-align:left;font-size:12.5px;font-weight:500;color:#667085;background:#F9FAFB;padding:10px 14px;border-bottom:1px solid #EAECF0}
+.tw td{padding:11px 14px;border-bottom:1px solid #EAECF0;vertical-align:top;color:#344054}
+.tw tr:last-child td{border-bottom:0}
+.tw td b{color:#0D0F12;font-weight:600}
+.old{color:#667085}
+.n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;box-sizing:border-box;border-radius:12px;background:#7A5AF8;color:#FFFFFF;font-weight:600;font-size:12px}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap}
+.t-new{background:#ECFDF3;color:#067647}.t-moved{background:#EFF8FF;color:#175CD3}.t-merged{background:#F4F3FF;color:#5925DC}
+.t-re{background:#F0EEFF;color:#4F3BDB}.t-gone{background:#FEF3F2;color:#B42318}.t-kept{background:#F2F4F7;color:#344054}.t-fix{background:#FFFAEB;color:#B54708}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px;border:1px solid rgba(16,24,40,.08)}
+code{font-size:12.5px;background:#F2F4F7;border:1px solid #E4E7EC;border-radius:4px;padding:1px 5px;color:#344054}
+</style>
+
+</head><body>
+
+<div class="cn" style="background:#F5F6F8;min-height:100vh;box-sizing:border-box;padding:40px 32px 64px">
+<div style="max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:13px;font-weight:600;color:#4F3BDB">Shelf Pulse handover</div>
+    <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-.01em;line-height:1.2">What changed from the old dashboard, and why</h1>
+    <p style="margin:0;color:#475467;font-size:15px;max-width:760px">This page compares the original mockup (<code>shelf_pulse_ui_mockup.html</code>) with the new dashboard on this canvas. It covers each section, each number and how it's calculated, the wording, and the design measurements, so the team can build it without guessing.</p>
+  </header>
+
+  <div style="display:flex;gap:12px;align-items:flex-start;background:#F4F3FF;border:1px solid #D9D6FE;border-radius:12px;padding:14px 16px;color:#3E1C96;font-size:13.5px">
+    <span class="n" style="flex:none">#</span>
+    <div>Open the dashboard on the Claude Design canvas and press <b>Show changes</b> in its top bar. Every changed area gets a purple numbered marker, and the numbers match the <b>#</b> column in section 2. Markers 15 to 19 appear on the store panel and the other pages, so click a store or switch pages to see them.</div>
+  </div>
+
+  <!-- 1 -->
+  <section class="sec">
+    <h2>1. At a glance</h2>
+    <p class="lead">Old mockup on the left of each arrow, new dashboard on the right.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));gap:12px">
+      <div style="border:1px solid #EAECF0;border-radius:12px;padding:14px 16px"><div style="font-size:12.5px;color:#475467">Pages</div><div style="font-size:22px;font-weight:700;margin-top:4px"><span style="color:#98A2B3;text-decoration:line-through;font-size:16px;font-weight:500">6 tabs</span> 5 pages</div><div style="font-size:12.5px;color:#667085">Map folded into Overview</div></div>
+      <div style="border:1px solid #EAECF0;border-radius:12px;padding:14px 16px"><div style="font-size:12.5px;color:#475467">Headline numbers</div><div style="font-size:22px;font-weight:700;margin-top:4px"><span style="color:#98A2B3;text-decoration:line-through;font-size:16px;font-weight:500">5</span> 1 + 4 + 4</div><div style="font-size:12.5px;color:#667085">1 big number, 4 supporting, 4 tiles</div></div>
+      <div style="border:1px solid #EAECF0;border-radius:12px;padding:14px 16px"><div style="font-size:12.5px;color:#475467">Charts</div><div style="font-size:22px;font-weight:700;margin-top:4px"><span style="color:#98A2B3;text-decoration:line-through;font-size:16px;font-weight:500">2</span> 9</div><div style="font-size:12.5px;color:#667085">All drawn in the page, no chart library</div></div>
+      <div style="border:1px solid #EAECF0;border-radius:12px;padding:14px 16px"><div style="font-size:12.5px;color:#475467">Typefaces</div><div style="font-size:22px;font-weight:700;margin-top:4px"><span style="color:#98A2B3;text-decoration:line-through;font-size:16px;font-weight:500">Inter</span> DM Sans</div><div style="font-size:12.5px;color:#667085">One family, no code-style font</div></div>
+      <div style="border:1px solid #EAECF0;border-radius:12px;padding:14px 16px"><div style="font-size:12.5px;color:#475467">Emoji used as icons</div><div style="font-size:22px;font-weight:700;margin-top:4px"><span style="color:#98A2B3;text-decoration:line-through;font-size:16px;font-weight:500">45</span> 0</div><div style="font-size:12.5px;color:#667085">Simple line icons instead</div></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="sec">
+    <h2>2. Section by section</h2>
+    <p class="lead">One row per numbered marker on the dashboard.</p>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>New</th><th>Was</th><th>Change</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><span class="n">1</span></td><td><b>Left menu</b> with 5 pages and 2 workspace links</td><td class="old">Dark sidebar holding Refresh, brand picker, brand filters and a "Live data only" box</td><td><span class="tag t-re">Repurposed</span></td><td>The left side is for moving between pages in most analytics tools. Filters move to the top, where it's obvious they affect the whole page.</td></tr>
+        <tr><td><span class="n">2</span></td><td><b>Brand switcher</b> at the top of the menu</td><td class="old">"Primary brand" dropdown in the sidebar</td><td><span class="tag t-moved">Moved</span></td><td>The brand is who you are in the tool, not a filter.</td></tr>
+        <tr><td><span class="n">3</span></td><td><b>"Data is up to date"</b> card at the bottom of the menu</td><td class="old">"Live data is 4 min old" caption and Refresh button</td><td><span class="tag t-merged">Merged</span></td><td>Shows how often stores are checked and when the next check is, in one plain sentence.</td></tr>
+        <tr><td><span class="n">4</span></td><td><b>Page header</b>: breadcrumb, page title, search, Show changes, light/dark, refresh, Export</td><td class="old">Title block inside the content, Live pill</td><td><span class="tag t-re">Redesigned</span></td><td>Each page gets a title that says what you'll find there.</td></tr>
+        <tr><td><span class="n">5</span></td><td><b>Platform switcher</b>: Blinkit, Zepto, Instamart</td><td class="old">Blinkit hard-coded</td><td><span class="tag t-new">New</span></td><td>Ready for more platforms. The sample numbers don't change yet.</td></tr>
+        <tr><td><span class="n">6</span></td><td><b>Filters</b>: Region, Dark stores, Competitors, Category, plus Today / 7D / 30D</td><td class="old">Brand pills in the sidebar</td><td><span class="tag t-moved">Moved and extended</span></td><td>Covers what a multi-city rollout needs.</td></tr>
+        <tr><td><span class="n">7</span></td><td><b>Headline availability</b>: 60 px number, a one-line summary, and 4 supporting numbers</td><td class="old">"Avg Availability" card, same size as the others</td><td><span class="tag t-re">Redesigned</span></td><td>The most important number is the biggest. The sentence underneath explains it.</td></tr>
+        <tr><td><span class="n">8</span></td><td><b>7-day availability chart</b>: you against 4 competitors</td><td class="old">Trends tab showing one product's stock</td><td><span class="tag t-new">New</span></td><td>Answers "am I getting better or worse than the others?"</td></tr>
+        <tr><td><span class="n">9</span></td><td><b>Stock on shelf in Delhi NCR</b>: units and share per brand</td><td class="old">Not shown</td><td><span class="tag t-new">New</span></td><td>Directly answers the brief: how much stock you and your competitors have in a region.</td></tr>
+        <tr><td><span class="n">10</span></td><td><b>4 summary tiles</b> with small trend lines</td><td class="old">Remaining KPI cards plus a row of "Details" buttons</td><td><span class="tag t-re">Reworked</span></td><td>Each tile is something you can act on. See section 3 for the maths.</td></tr>
+        <tr><td><span class="n">11</span></td><td><b>Availability by dark store</b>: store × brand grid, clickable rows</td><td class="old">Map tab table (Location, Status, OOS %)</td><td><span class="tag t-new">New</span></td><td>Shows which store and which competitor you're losing to, in one view.</td></tr>
+        <tr><td><span class="n">12</span></td><td><b>Needs your attention</b>: 4 actions with a button each</td><td class="old">Only implied by the Outbox</td><td><span class="tag t-new">New</span></td><td>Turns alerts into to-dos: Transfer, Reorder, Compare, Check.</td></tr>
+        <tr><td><span class="n">13</span></td><td><b>Out of stock right now</b> with nearby-store stock</td><td class="old">OOS tab plus a separate "Check nearby stores" card</td><td><span class="tag t-merged">Merged</span></td><td>The nearby-store result is now a column, not a separate step.</td></tr>
+        <tr><td><span class="n">14</span></td><td><b>Store health</b>: map pins plus a sorted list</td><td class="old">Map tab with a placeholder image</td><td><span class="tag t-re">Redesigned</span></td><td>The map is a sketch. Production should use real store coordinates.</td></tr>
+        <tr><td><span class="n">15</span></td><td><b>Store panel</b>: opens from a grid row or a map pin</td><td class="old">Not available</td><td><span class="tag t-new">New</span></td><td>Shows availability by brand, your rank and what's missing at that one store.</td></tr>
+        <tr><td><span class="n">16</span></td><td><b>Stock-outs page</b>: full table and two charts</td><td class="old">OOS Alerts tab and the frequency table</td><td><span class="tag t-re">Redesigned</span></td><td>Adds how often each product ran out and which stores run out most.</td></tr>
+        <tr><td><span class="n">17</span></td><td><b>Competition page</b>: grouped bars, comparison table, competitor stock-outs</td><td class="old">Benchmarking tab with a rainbow bar chart</td><td><span class="tag t-re">Redesigned</span></td><td>Each brand keeps one colour everywhere. Competitor stock-outs are shown as chances to win.</td></tr>
+        <tr><td><span class="n">18</span></td><td><b>What runs out next</b>: units, selling speed, time left, what to do</td><td class="old">Depletion Forecast tab</td><td><span class="tag t-re">Redesigned</span></td><td>Shows why each estimate is what it is, plus a clear action.</td></tr>
+        <tr><td><span class="n">19</span></td><td><b>Today's alerts</b> with working filters</td><td class="old">Outbox tab with static chips</td><td><span class="tag t-re">Renamed</span></td><td>"Outbox" was an internal word. The filters now work and show counts.</td></tr>
+        <tr><td><span class="n">20</span></td><td><b>Data note</b> at the bottom</td><td class="old">Warning footer and a yellow mockup banner</td><td><span class="tag t-kept">Kept, softer</span></td><td>Same message, written plainly.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Removed completely</h3>
+    <p style="margin:0;color:#344054">The yellow "STATIC MOCKUP" banner, the row of "Details" buttons, the "Brands Compared" card, the "Live data only" checkbox, the "Simulated" column, all emoji icons and the monospace font.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="sec">
+    <h2>3. Numbers and how to calculate them</h2>
+    <p class="lead">"Product" means one product at one dark store unless stated otherwise.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Old card</th><th>Status</th><th>New label</th><th>How it's calculated</th><th>Compared with</th></tr></thead>
+      <tbody>
+        <tr><td class="old">Paper Boat's SKUs · 34</td><td><span class="tag t-merged">Folded in</span></td><td>"of 34" on the stock-out tile</td><td>Number of active products for the brand in the selected stores</td><td>None</td></tr>
+        <tr><td class="old">OOS Now · 5</td><td><span class="tag t-kept">Kept</span></td><td><b>Out of stock right now</b></td><td>Products with 0 units at the latest check</td><td>The previous check</td></tr>
+        <tr><td class="old">Avg Availability · 86% (a drop was shown in green)</td><td><span class="tag t-fix">Kept, colour fixed</span></td><td><b>On-shelf availability</b></td><td>Checks where the product was in stock, divided by all checks, for the selected period</td><td>The same period before it. A drop is now red.</td></tr>
+        <tr><td class="old">Top Competitor · Real</td><td><span class="tag t-re">Replaced</span></td><td><b>Behind Real · 7 points</b> and "4th of 5 brands"</td><td>Best competitor's availability minus yours, in percentage points, plus your rank</td><td>The leading brand</td></tr>
+        <tr><td class="old">Brands Compared · 5</td><td><span class="tag t-gone">Removed</span></td><td>None</td><td>It only repeated the filter, which now says "Competitors 4 brands"</td><td>None</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Products in stock</b> · 29 of 34</td><td>Active products minus products out of stock</td><td>None</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Hours off shelf</b> · 29 hrs</td><td>Total hours each product spent at 0 units during the period</td><td>The same period before it</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Average outage</b> · 2 hr 39 min</td><td>Average time out of stock across products that are out right now</td><td>None</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Running out in 6 hours</b> · 2</td><td>In-stock products where units left ÷ hourly selling speed is 6 or less</td><td>None (products named)</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Stock at nearby stores</b> · 2 of 5</td><td>Out-of-stock products where a neighbouring store has at least 1 unit; total units shown below</td><td>Trend over 7 days</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Competitors out of stock</b> · 7</td><td>Competitor products with 0 units at the latest check</td><td>The previous check</td></tr>
+        <tr><td class="old">None</td><td><span class="tag t-new">New</span></td><td><b>Stock on shelf</b> · 4,410 units</td><td>Sum of units at the latest check, per brand; share = brand units ÷ all units</td><td>Change against 7 days ago</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Inside the panels</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Measure</th><th>Where</th><th>Before</th><th>Now</th></tr></thead>
+      <tbody>
+        <tr><td><b>Store status</b></td><td>Grid, map, store panel</td><td class="old">Out-of-stock % across all brands: under 10% green, 10 to 30% amber, over 30% red</td><td>Your availability at that store: 90% or more Healthy, 80 to 89% Watch, under 80% Critical. <b>This basis changed, so please confirm it.</b></td></tr>
+        <tr><td><b>Store × brand availability</b></td><td>Grid, grouped bars, store panel</td><td class="old">Not shown</td><td>In-stock checks ÷ checks, per store per brand. Average row = mean of the 5 stores.</td></tr>
+        <tr><td><b>Out for</b></td><td>Stock-out tables, store panel</td><td class="old">"Observed at" time only</td><td>Now minus the first check that found 0 units</td></tr>
+        <tr><td><b>This week</b></td><td>Stock-outs page</td><td class="old">"Stock-out events"</td><td>Number of times it went from in stock to 0 in the last 7 days</td></tr>
+        <tr><td><b>Nearby stores</b></td><td>Stock-out tables</td><td class="old">Separate check run by hand</td><td>One of: "6 at store 31719", "Out nearby too", "Not sold nearby", "May be delisted"</td></tr>
+        <tr><td><b>Competitor in stock</b></td><td>Stock-outs page</td><td class="old">Only inside alert text</td><td>Whether the matching competitor product is in stock at the same store</td></tr>
+        <tr><td><b>Selling</b> and <b>Time left</b></td><td>What runs out next</td><td class="old">"Est. hours to stock-out"</td><td>Selling = units sold per hour over the last 6 hours. Time left = units ÷ selling. 6 hrs or less: Reorder now. 12 hrs or less: Reorder today. Otherwise On track.</td></tr>
+        <tr><td><b>vs you</b></td><td>Competition table</td><td class="old">Not shown</td><td>Competitor availability minus yours, written as "7 ahead" or "7 behind"</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="sec">
+    <h2>4. Wording: old label to new label</h2>
+    <p class="lead">The rule: write the way a person on the team would say it. No codes, no symbols standing in for words, no ALL CAPS.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Old or technical</th><th>New</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td class="old">paper-boat / overview</td><td>Paper Boat › Overview</td><td>Breadcrumb</td></tr>
+        <tr><td class="old">Paper Boat's Stock Intelligence</td><td>How your shelf looks today</td><td>Overview title</td></tr>
+        <tr><td class="old">OOS Alerts · Benchmarking · Depletion Forecast · Outbox</td><td>What's out of stock, You vs other brands, What runs out next, Alerts</td><td>Page titles</td></tr>
+        <tr><td class="old">SKU</td><td>Product</td><td>All tables</td></tr>
+        <tr><td class="old">OOS / Stock-out</td><td>Out of stock</td><td>Everywhere</td></tr>
+        <tr><td class="old">▼ 3 pp vs prev. period</td><td>Down 3 points from 89% last week</td><td>Headline</td></tr>
+        <tr><td class="old">Gap to leader −7 pp</td><td>Behind Real · 7 points</td><td>Headline</td></tr>
+        <tr><td class="old">Shelf-hours lost 29.0 h</td><td>Hours off shelf · 29 hrs</td><td>Headline</td></tr>
+        <tr><td class="old">Δ 7d</td><td>Week</td><td>Column headers</td></tr>
+        <tr><td class="old">Runway · next 24 h</td><td>Time left</td><td>What runs out next</td></tr>
+        <tr><td class="old">Sell rate 1.2/h</td><td>Selling · 1.2 an hr</td><td>What runs out next</td></tr>
+        <tr><td class="old">Heuristic · not a demand model</td><td>Rough estimate</td><td>What runs out next</td></tr>
+        <tr><td class="old">Recoverable from nearby</td><td>Stock at nearby stores · ready to move</td><td>Tile</td></tr>
+        <tr><td class="old">4 units · #49971</td><td>4 at store 49971</td><td>Nearby stores</td></tr>
+        <tr><td class="old">3h 50m · 09:50</td><td>3 hr 50 min · 9:50 am</td><td>Times and durations</td></tr>
+        <tr><td class="old">Low stock / New SKU</td><td>Running low / New product</td><td>Alert types</td></tr>
+        <tr><td class="old">New listing detected: Guava Twist…</td><td>Guava Twist 200 ml is now listed at Lajpat Nagar.</td><td>Alert text</td></tr>
+        <tr><td class="old">Feed healthy · next in 6 min</td><td>Data is up to date. We check 5 stores every 10 minutes.</td><td>Menu card</td></tr>
+        <tr><td class="old">Live · updated 4 min ago</td><td>Updated 4 min ago</td><td>Filter bar</td></tr>
+        <tr><td class="old">schematic · not to scale</td><td>Not to scale</td><td>Map</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="sec">
+    <h2>5. Design measurements</h2>
+    <p class="lead">Every colour is a variable at the top of the dashboard's code, so it can be changed in one place.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Property</th><th>Old</th><th>New</th></tr></thead>
+      <tbody>
+        <tr><td><b>Theme</b></td><td class="old">Light only</td><td>White by default. An optional dark theme sits behind the moon button.</td></tr>
+        <tr><td><b>Typeface</b></td><td class="old">Inter 400 to 800, headings 800</td><td><b>DM Sans</b> 400 to 700. One family for everything. Numbers use tabular figures so columns line up. No monospace anywhere.</td></tr>
+        <tr><td><b>Type sizes</b></td><td class="old">Title 18.9 px/800 · KPI 22.4 px/800 · labels down to 10 px</td><td>Headline number 60/700 · tile number 30/600 · page title 22/700 · card title 15/600 · body 13 to 14 · labels 12.5. Sentence case everywhere.</td></tr>
+        <tr><td><b>Main colour</b></td><td class="old"><span class="sw" style="background:#4f46e5"></span>#4F46E5 plus a rainbow of extras</td><td><span class="sw" style="background:#6E5BFF"></span>#6E5BFF violet, used for your brand, the main button and the current page. Can be switched to <span class="sw" style="background:#2563EB"></span>blue, <span class="sw" style="background:#0D9488"></span>teal or <span class="sw" style="background:#E04F16"></span>orange in the canvas controls.</td></tr>
+        <tr><td><b>Brand colours</b></td><td class="old">Different colour per chart</td><td>Same colour everywhere: <span class="sw" style="background:#0D9488"></span>Real · <span class="sw" style="background:#2563EB"></span>Raw Pressery · <span class="sw" style="background:#DB2777"></span>B Natural · <span class="sw" style="background:#98A2B3"></span>Tropicana</td></tr>
+        <tr><td><b>Status colours</b></td><td class="old">Emoji dots and mixed text colours</td><td><span class="sw" style="background:#D92D20"></span>Critical #D92D20 on #FEF3F2 · <span class="sw" style="background:#DC6803"></span>Watch #DC6803 on #FFFAEB · <span class="sw" style="background:#079455"></span>Healthy #079455 on #ECFDF3. Only used for status.</td></tr>
+        <tr><td><b>Background and lines</b></td><td class="old">#F6F7FB page · #E8EAED borders</td><td>#F5F6F8 page · #FFFFFF cards · #EAECF0 borders · #D0D5DD input borders</td></tr>
+        <tr><td><b>Text colours</b></td><td class="old">#111827 and #6B7280</td><td>#0D0F12 main · #344054 secondary · #475467 muted · #667085 light (all readable on white)</td></tr>
+        <tr><td><b>Layout</b></td><td class="old">260 px sidebar, content in flex rows, no breakpoints</td><td>Menu about 220 px. Content padding 22 × 28 px, max width 1480 px. Cards pair up 2 : 1 (wide card about 600 px, narrow about 320 px) and stack on smaller screens.</td></tr>
+        <tr><td><b>Cards</b></td><td class="old">Radius 14 and 12, two shadow styles</td><td>Radius 16, 1 px border, very light shadow, 18 to 22 px padding</td></tr>
+        <tr><td><b>Tables</b></td><td class="old">Rows about 36 px, 10.9 px ALL CAPS headers</td><td>Rows about 60 px (13 × 20 padding), 12.5 px sentence-case headers on #F9FAFB, numbers right-aligned</td></tr>
+        <tr><td><b>Store grid cells</b></td><td class="old">Not used</td><td>44 px tall, radius 8, tinted by status; your brand's column outlined in the main colour</td></tr>
+        <tr><td><b>Buttons and badges</b></td><td class="old">Mixed heights, 26 to 34 px</td><td>Buttons 36 px (30 px inside lists). Badges 22 px tall, radius 6, with a small dot.</td></tr>
+        <tr><td><b>Icons</b></td><td class="old">Emoji</td><td>Line icons, 18 px (16 small), 1.6 px stroke</td></tr>
+        <tr><td><b>Charts</b></td><td class="old">Chart.js, 2 charts</td><td>Drawn directly as SVG and simple bars. Your brand's line is 2.6 px with a soft fill; competitors 1.6 px.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="sec">
+    <h2>6. What you can click</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Control</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><b>Left menu</b></td><td>Switches between Overview, Stock-outs, Competition, Forecast and Alerts</td></tr>
+        <tr><td><b>Store row or map pin</b></td><td>Opens the store panel on the right. Click outside it or press × to close.</td></tr>
+        <tr><td><b>Platform and period</b></td><td>Switch the selected option (sample numbers stay the same for now)</td></tr>
+        <tr><td><b>View all, Transfer, Reorder, Compare, Check</b></td><td>Jump to the matching page</td></tr>
+        <tr><td><b>Alert type buttons</b></td><td>Filter the alert list</td></tr>
+        <tr><td><b>Moon / sun</b></td><td>Light or dark theme</td></tr>
+        <tr><td><b>Show changes</b></td><td>Shows the numbered markers that match this page</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="sec">
+    <h2>7. What the backend needs</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Needed</th><th>Used by</th><th>Exists today?</th></tr></thead>
+      <tbody>
+        <tr><td><b>Daily availability per brand</b></td><td>7-day chart, tile trend lines, "last week" comparisons</td><td><span class="tag t-fix">Partly</span> (checks exist, need a daily roll-up)</td></tr>
+        <tr><td><b>Availability per store per brand</b></td><td>Store grid, grouped bars, store panel, store status</td><td><span class="tag t-fix">Partly</span> (group the existing checks)</td></tr>
+        <tr><td><b>Units on shelf per brand</b></td><td>Stock on shelf panel</td><td><span class="tag t-fix">Partly</span> (inventory is captured; needs summing)</td></tr>
+        <tr><td><b>Saved nearby-store result for each stock-out</b></td><td>Nearby stores column, "Stock at nearby stores" tile</td><td><span class="tag t-gone">No</span> (today it runs by hand at about 1 request a second)</td></tr>
+        <tr><td><b>Our product ↔ competitor product mapping</b></td><td>Competitor in stock, "Where competitors ran out", competitor-gap alerts</td><td><span class="tag t-gone">No</span> (a mapping table needs to be created)</td></tr>
+        <tr><td><b>Selling speed from at least 3 checks</b></td><td>What runs out next, "Running out in 6 hours"</td><td><span class="tag t-fix">Partly</span> (rough version exists)</td></tr>
+        <tr><td><b>Time each outage started</b></td><td>Out for, hours off shelf, average outage</td><td><span class="tag t-fix">Partly</span> (can be worked out from check history)</td></tr>
+        <tr><td><b>Zepto and Instamart data</b></td><td>Platform switcher</td><td><span class="tag t-gone">No</span> (Blinkit only today)</td></tr>
+        <tr><td><b>Store map coordinates</b></td><td>Store health map</td><td><span class="tag t-kept">Yes</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <p style="margin:0;color:#667085;font-size:12.5px">All numbers on the dashboard are sample data. Prepared 2 Nov 2026.</p>
+</div>
+</div>
+</body></html>

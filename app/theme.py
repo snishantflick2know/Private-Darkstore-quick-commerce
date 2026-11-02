@@ -1,7 +1,8 @@
 """Shared visual constants so every chart/card in the dashboard looks consistent.
 
-Visual direction modeled after modern retail-analytics dashboards (dark sidebar nav,
-white icon-badged KPI cards, bordered chart cards with icon headers).
+Visual direction: matches the "Shelf Pulse" redesign handed back by the design
+agent (DM Sans typeface, violet #6E5BFF accent, white cards on a light-gray
+canvas, left-hand page nav, sentence-case copy, per-brand fixed colors).
 """
 from __future__ import annotations
 
@@ -13,30 +14,47 @@ PLATFORM_COLORS = {
     "instamart": "#FC8019",
 }
 
-SEVERITY_COLORS = {"Healthy": "#16a34a", "Watch": "#f59e0b", "Critical": "#dc2626"}
+SEVERITY_COLORS = {"Healthy": "#079455", "Watch": "#DC6803", "Critical": "#D92D20"}
 
-ACCENT = "#4f46e5"
-INK = "#111827"
-MUTED = "#6b7280"
-BORDER = "#e8eaed"
-SURFACE = "#ffffff"
-CANVAS = "#f6f7fb"
-SIDEBAR_BG = "#0b1220"
-SIDEBAR_BG_ALT = "#141b2d"
-SIDEBAR_TEXT = "#cbd5e1"
-SIDEBAR_MUTED = "#6b7a99"
+ACCENT = "#6E5BFF"
+INK = "#0D0F12"
+TEXT_SECONDARY = "#344054"
+MUTED = "#475467"
+MUTED_LIGHT = "#667085"
+BORDER = "#EAECF0"
+INPUT_BORDER = "#D0D5DD"
+SURFACE = "#FFFFFF"
+CANVAS = "#F5F6F8"
+# Left nav is white by default per the redesign (not a dark navy panel like the
+# earlier version of this dashboard) - a dark theme was proposed as optional,
+# behind a toggle, but isn't implemented here (Streamlit's own light/dark theme
+# switch covers that need instead - see the "☾" note in inject_css).
+SIDEBAR_BG = "#FFFFFF"
+SIDEBAR_BG_ALT = "#F9FAFB"
+SIDEBAR_TEXT = TEXT_SECONDARY
+SIDEBAR_MUTED = MUTED_LIGHT
+
+# Fixed per-brand colors so a brand keeps the same color everywhere (bar
+# charts, line charts, store grid) instead of a different hue per chart.
+BRAND_COLORS = {
+    "Real": "#0D9488",
+    "Raw Pressery": "#2563EB",
+    "B Natural": "#DB2777",
+    "Tropicana": "#98A2B3",
+}
+CLIENT_COLOR = ACCENT  # the selected primary brand always gets the accent color
 
 # (background tint, foreground) pairs for icon badges / accents, by semantic tone.
 TONES = {
-    "indigo": ("#eef2ff", "#4f46e5"),
-    "red": ("#fef2f2", "#dc2626"),
-    "green": ("#f0fdf4", "#16a34a"),
-    "amber": ("#fffbeb", "#d97706"),
-    "purple": ("#faf5ff", "#9333ea"),
-    "slate": ("#f3f4f6", "#374151"),
+    "indigo": ("#F4F3FF", "#6E5BFF"),
+    "red": ("#FEF3F2", "#D92D20"),
+    "green": ("#ECFDF3", "#079455"),
+    "amber": ("#FFFAEB", "#DC6803"),
+    "purple": ("#F4F3FF", "#5925DC"),
+    "slate": ("#F2F4F7", "#344054"),
 }
 
-FONT_FAMILY = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+FONT_FAMILY = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
 
 
 def _html(s: str) -> str:
@@ -67,17 +85,23 @@ def apply_layout(fig, **overrides):
     layout = {**PLOTLY_LAYOUT, **overrides}
     fig.update_layout(**layout)
     fig.update_xaxes(showgrid=False, linecolor=BORDER)
-    fig.update_yaxes(showgrid=True, gridcolor="#f0f1f5", zeroline=False)
+    fig.update_yaxes(showgrid=True, gridcolor="#F2F4F7", zeroline=False)
     return fig
+
+
+def brand_color(brand: str, client_brand: str) -> str:
+    if brand == client_brand:
+        return CLIENT_COLOR
+    return BRAND_COLORS.get(brand, "#98A2B3")
 
 
 def inject_css() -> str:
     return _html(f"""
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
     <style>
-    html, body, [class*="css"] {{ font-family: {FONT_FAMILY}; }}
-    .block-container {{ padding-top: 0.8rem; padding-bottom: 1.5rem; max-width: 1440px; }}
+    html, body, [class*="css"] {{ font-family: {FONT_FAMILY}; font-variant-numeric: tabular-nums; }}
+    .block-container {{ padding-top: 0.8rem; padding-bottom: 1.5rem; max-width: 1480px; }}
     /* Hide the "Deploy"/menu chrome, but NOT the whole header - the sidebar's
        collapse/expand arrow (data-testid="collapsedControl") lives inside that
        same header element, so hiding it entirely traps the sidebar closed with
@@ -91,95 +115,127 @@ def inject_css() -> str:
     div[data-testid="stVerticalBlock"] {{ gap: 0.5rem; }}
 
     /* ---- Top toolbar ---- */
-    .toolbar-title {{ font-size: 1.18rem; font-weight: 800; color: {INK}; letter-spacing: -0.01em; margin: 0; }}
-    .toolbar-sub {{ font-size: 0.8rem; color: {MUTED}; margin-top: 1px; }}
+    .toolbar-title {{ font-size: 1.35rem; font-weight: 700; color: {INK}; letter-spacing: -0.01em; margin: 0; }}
+    .toolbar-sub {{ font-size: 0.82rem; color: {MUTED}; margin-top: 2px; }}
+    .breadcrumb {{ font-size: 0.78rem; color: {MUTED_LIGHT}; font-weight: 500; margin-bottom: 2px; }}
+    .breadcrumb b {{ color: {INK}; font-weight: 600; }}
     .pill {{
         display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px;
-        font-size:0.64rem; font-weight:700; margin-right:5px; letter-spacing:0.02em;
-        text-transform: uppercase; border: 1px solid transparent;
+        font-size:0.68rem; font-weight:600; margin-right:5px; letter-spacing:0.01em;
+        border: 1px solid transparent;
     }}
-    .pill-live {{ background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }}
-    .pill-sim {{ background:#fffbeb; color:#b45309; border-color:#fde68a; }}
+    .pill-live {{ background:#ECFDF3; color:#079455; border-color:#ABEFC6; }}
+    .pill-sim {{ background:#FFFAEB; color:#B54708; border-color:#FEDF89; }}
+    .dot-ind {{ width:7px; height:7px; border-radius:50%; display:inline-block; }}
 
-    /* ---- KPI cards ---- */
-    .kpi-row {{ display:flex; gap:10px; margin-bottom: 12px; flex-wrap: wrap; }}
+    /* ---- Headline number (Overview page) ---- */
+    .headline-number {{ font-size: 3.1rem; font-weight: 700; color: {INK}; line-height: 1.0; letter-spacing: -0.02em; }}
+    .headline-sentence {{ font-size: 0.92rem; color: {MUTED}; margin-top: 8px; max-width: 520px; }}
+
+    /* ---- KPI / tile cards ---- */
+    .kpi-row {{ display:flex; gap:12px; margin-bottom: 12px; flex-wrap: wrap; }}
     .kpi-card {{
-        flex: 1 1 165px; background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 12px;
-        padding: 11px 13px; box-shadow: 0 1px 2px rgba(16,24,40,0.03);
-        transition: box-shadow .15s ease, transform .15s ease;
+        flex: 1 1 200px; background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 16px;
+        padding: 16px 18px; box-shadow: 0 1px 2px rgba(16,24,40,.04);
     }}
-    .kpi-card:hover {{ box-shadow: 0 8px 18px -8px rgba(16,24,40,0.16); transform: translateY(-1px); }}
-    .kpi-head {{ display:flex; align-items:center; gap:7px; margin-bottom: 8px; }}
+    .kpi-head {{ display:flex; align-items:center; gap:8px; margin-bottom: 10px; }}
     .kpi-icon {{
-        width: 24px; height: 24px; border-radius: 7px; display:flex; align-items:center;
-        justify-content:center; font-size: 0.74rem; flex-shrink:0; background:#f3f4f6; color:#4b5563;
+        width: 26px; height: 26px; border-radius: 8px; display:flex; align-items:center;
+        justify-content:center; font-size: 0.78rem; flex-shrink:0; background:#F2F4F7; color:#344054;
     }}
-    .kpi-title {{ font-size: 0.73rem; color: {INK}; font-weight: 700; line-height:1.15; }}
-    .kpi-subtitle {{ font-size: 0.63rem; color: {MUTED}; margin-top:0px; }}
-    .kpi-valrow {{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }}
-    .kpi-value {{ font-size: 1.35rem; font-weight: 800; color: {INK}; line-height: 1.05; }}
-    .kpi-meta {{ font-size: 0.65rem; color: {MUTED}; margin-top: 3px; }}
+    .kpi-title {{ font-size: 0.78rem; color: {INK}; font-weight: 600; line-height:1.2; }}
+    .kpi-subtitle {{ font-size: 0.68rem; color: {MUTED_LIGHT}; margin-top:1px; }}
+    .kpi-valrow {{ display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; }}
+    .kpi-value {{ font-size: 1.9rem; font-weight: 700; color: {INK}; line-height: 1.05; }}
+    .kpi-meta {{ font-size: 0.7rem; color: {MUTED_LIGHT}; margin-top: 5px; }}
     .delta-chip {{
-        display:inline-flex; align-items:center; gap:2px; padding:0px 7px; border-radius:999px;
-        font-size:0.68rem; font-weight:700;
+        display:inline-flex; align-items:center; gap:2px; padding:1px 8px; border-radius:999px;
+        font-size:0.7rem; font-weight:600;
     }}
-    .delta-bad {{ background:#fef2f2; color:#dc2626; }}
-    .delta-good {{ background:#f0fdf4; color:#15803d; }}
-    .delta-flat {{ background:#f3f4f6; color:#4b5563; }}
+    .delta-bad {{ background:#FEF3F2; color:#D92D20; }}
+    .delta-good {{ background:#ECFDF3; color:#079455; }}
+    .delta-flat {{ background:#F2F4F7; color:#475467; }}
 
     /* ---- Custom dot legend above charts ---- */
-    .dot-legend {{ display:flex; gap:14px; flex-wrap:wrap; margin: 0px 0 4px 0; }}
-    .dot-legend span.item {{ display:inline-flex; align-items:center; gap:5px; font-size:0.74rem; color:{MUTED}; font-weight:600; }}
+    .dot-legend {{ display:flex; gap:16px; flex-wrap:wrap; margin: 0px 0 8px 0; }}
+    .dot-legend span.item {{ display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; color:{MUTED}; font-weight:500; }}
     .dot-legend span.dot {{ width:8px; height:8px; border-radius:50%; display:inline-block; }}
 
     /* ---- Card headers (for chart/table sections) ---- */
-    .card-header {{ display:flex; align-items:flex-start; gap:10px; margin-bottom: 10px; }}
+    .card-header {{ display:flex; align-items:flex-start; gap:10px; margin-bottom: 12px; }}
     .card-icon {{
-        width: 30px; height: 30px; border-radius: 9px; display:flex; align-items:center;
-        justify-content:center; font-size: 0.92rem; flex-shrink: 0;
+        width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center;
+        justify-content:center; font-size: 0.95rem; flex-shrink: 0;
     }}
-    .card-title {{ font-size: 0.92rem; font-weight: 700; color: {INK}; line-height: 1.25; }}
-    .card-subtitle {{ font-size: 0.74rem; color: {MUTED}; margin-top: 0px; }}
+    .card-title {{ font-size: 0.98rem; font-weight: 600; color: {INK}; line-height: 1.3; }}
+    .card-subtitle {{ font-size: 0.78rem; color: {MUTED}; margin-top: 2px; }}
+
+    /* ---- Status badges ---- */
+    .status-badge {{
+        display:inline-flex; align-items:center; gap:5px; height:22px; padding:0 9px; border-radius:6px;
+        font-size:0.72rem; font-weight:600;
+    }}
+    .status-healthy {{ background:#ECFDF3; color:#079455; }}
+    .status-watch {{ background:#FFFAEB; color:#DC6803; }}
+    .status-critical {{ background:#FEF3F2; color:#D92D20; }}
+
+    /* ---- Needs-attention action cards ---- */
+    .attn-card {{
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        border: 1px solid {BORDER}; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+        background: {SURFACE};
+    }}
+    .attn-text {{ font-size: 0.84rem; color: {INK}; font-weight:500; }}
+    .attn-sub {{ font-size: 0.72rem; color: {MUTED_LIGHT}; margin-top:2px; }}
 
     /* ---- View-by pill toggle (st.radio, horizontal) ---- */
     div[role="radiogroup"] {{ gap: 4px; }}
     div[role="radiogroup"] label {{
-        background: #f3f4f6; border-radius: 8px; padding: 2px 10px; border: 1px solid {BORDER};
+        background: #F2F4F7; border-radius: 8px; padding: 2px 10px; border: 1px solid {BORDER};
     }}
 
     /* ---- Bordered containers used as cards ---- */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 14px !important; border-color: {BORDER} !important;
+        border-radius: 16px !important; border-color: {BORDER} !important;
         box-shadow: 0 1px 3px rgba(16,24,40,0.04);
     }}
-    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stVerticalBlock"] {{ gap: 0.35rem; }}
+    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stVerticalBlock"] {{ gap: 0.4rem; }}
 
-    /* ---- Tabs ---- */
-    div[data-testid="stTabs"] button {{ font-weight: 600; font-size: 0.92rem; }}
-    div[data-testid="stTabs"] button[aria-selected="true"] {{ color: {ACCENT}; }}
-    div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {{ background-color: {ACCENT}; }}
-
-    /* ---- Sidebar: dark branding/status panel ---- */
-    section[data-testid="stSidebar"] {{ background: {SIDEBAR_BG}; border-right: 1px solid #1e293b; }}
+    /* ---- Left nav (sidebar) - white, per the redesign (not the earlier dark panel) ---- */
+    section[data-testid="stSidebar"] {{ background: {SIDEBAR_BG}; border-right: 1px solid {BORDER}; }}
     section[data-testid="stSidebar"] * {{ color: {SIDEBAR_TEXT}; }}
     section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {{ color: #ffffff; }}
-    section[data-testid="stSidebar"] hr {{ border-color: #1e293b; }}
-    .sb-brand {{ display:flex; align-items:center; gap:10px; padding: 6px 0 18px 0; }}
+    section[data-testid="stSidebar"] h3 {{ color: {INK}; }}
+    section[data-testid="stSidebar"] hr {{ border-color: {BORDER}; }}
+    .sb-brand {{ display:flex; align-items:center; gap:10px; padding: 6px 0 18px 0; border-bottom: 1px solid {BORDER}; margin-bottom: 4px; }}
     .sb-brand-badge {{
-        width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#4f46e5,#8b5cf6);
+        width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#6E5BFF,#9b8cff);
         display:flex; align-items:center; justify-content:center; font-size:1.1rem;
     }}
-    .sb-brand-name {{ font-weight:800; color:#fff; font-size:1.02rem; line-height:1.1; }}
+    .sb-brand-name {{ font-weight:700; color:{INK}; font-size:1.02rem; line-height:1.1; }}
     .sb-brand-sub {{ font-size:0.72rem; color:{SIDEBAR_MUTED}; }}
     .sb-section-label {{
-        font-size: 0.68rem; font-weight:700; color:{SIDEBAR_MUTED}; text-transform:uppercase;
+        font-size: 0.68rem; font-weight:600; color:{SIDEBAR_MUTED}; text-transform:uppercase;
         letter-spacing: 0.06em; margin: 18px 0 8px 0;
     }}
     .sb-status-row {{ font-size: 0.82rem; color: {SIDEBAR_TEXT}; padding: 3px 0; }}
+    .sb-status-card {{
+        background: {SIDEBAR_BG_ALT}; border: 1px solid {BORDER}; border-radius: 10px; padding: 10px 12px;
+        font-size: 0.76rem; color: {MUTED}; line-height: 1.4;
+    }}
+    /* st.radio re-skinned as a left-nav page list, active page = light violet pill */
+    section[data-testid="stSidebar"] div[role="radiogroup"] {{ flex-direction: column; gap: 2px; }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] label {{
+        background: transparent; border: none; padding: 9px 10px; border-radius: 8px; width: 100%;
+        font-size: 0.86rem; font-weight: 500; color: {TEXT_SECONDARY};
+    }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {{ background: {CANVAS}; }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {{
+        background: {TONES['indigo'][0]}; color: {ACCENT};
+    }}
 
     /* ---- Misc ---- */
-    [data-testid="stDataFrame"] {{ border: 1px solid {BORDER}; border-radius: 10px; overflow: hidden; }}
+    [data-testid="stDataFrame"] {{ border: 1px solid {BORDER}; border-radius: 12px; overflow: hidden; }}
 
     /* ---- Popovers (KPI drill-downs): kill the slow open/resize animation ---- */
     [data-baseweb="popover"], [data-baseweb="popover"] *,
@@ -219,6 +275,12 @@ def kpi_card(icon: str, title: str, subtitle: str, value: str, meta: str = "", t
         <div class="kpi-meta">{meta}</div>
     </div>
     """)
+
+
+def status_badge(status: str) -> str:
+    cls = {"Healthy": "status-healthy", "Watch": "status-watch", "Critical": "status-critical"}.get(status, "status-healthy")
+    dot = {"Healthy": "🟢", "Watch": "🟠", "Critical": "🔴"}.get(status, "")
+    return f'<span class="status-badge {cls}">{dot} {status}</span>'
 
 
 def dot_legend(items: list[tuple[str, str]]) -> str:

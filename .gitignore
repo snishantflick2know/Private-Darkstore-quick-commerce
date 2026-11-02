@@ -2,6 +2,11 @@
 __pycache__/
 *.pyc
 .env
-data/*.db
+# data/stock_tracker.db is intentionally tracked (not ignored) - the
+# GitHub Actions workflow (.github/workflows/update-data.yml) commits it
+# after every scheduled scrape so history persists across ephemeral runs,
+# which the depletion-forecast/trend calculations need to mean anything.
+data/*.db.bak
 streamlit.log
 nohup.out
+webapp/__pycache__/

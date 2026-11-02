@@ -122,6 +122,117 @@ def stockout_duration_hours(df: pd.DataFrame, only_affected: bool = True) -> pd.
     return result
 
 
+def availability_by_store_brand(df: pd.DataFrame) -> pd.DataFrame:
+    """Availability % per (location_name, brand) - the "store x brand" grid.
+
+    `location_name` is used as the store axis (not `merchant_id`) because the
+    primary-store search is what actually discovers each tracked brand's full
+    catalog at a given point, and that's what's polled repeatedly - matching
+    the existing single-store-per-location assumption used elsewhere in the
+    dashboard (map, KPIs). Real multi-merchant-per-location data exists only
+    for ad-hoc "check nearby stores" lookups, not as a repeated time series.
+    """
+    cols = ["location_name", "brand", "availability_pct", "observations"]
+    if df.empty:
+        return pd.DataFrame(columns=cols)
+    g = (
+        df.groupby(["location_name", "brand"])
+        .agg(observations=("is_sold_out", "size"), stockouts=("is_sold_out", "sum"))
+        .reset_index()
+    )
+    g["availability_pct"] = (1 - g["stockouts"] / g["observations"]) * 100
+    return g[cols]
+
+
+def stock_on_shelf_by_brand(df: pd.DataFrame) -> pd.DataFrame:
+    """Total units currently on shelf per brand (sum of latest inventory across
+    all tracked locations), plus each brand's share of total tracked units.
+    Real inventory counts, as reported by the platform - not an estimate.
+    """
+    cols = ["brand", "units", "share_pct"]
+    latest = latest_snapshot(df)
+    if latest.empty:
+        return pd.DataFrame(columns=cols)
+    g = latest.groupby("brand")["inventory"].sum().reset_index(name="units")
+    total = g["units"].sum()
+    g["share_pct"] = (g["units"] / total * 100) if total else 0
+    return g.sort_values("units", ascending=False)[cols]
+
+
+def oos_summary_stats(df: pd.DataFrame, client_brand: str) -> dict:
+    """Headline/tile numbers for the Overview page, all derived from real
+    snapshot history - no fabricated figures. Returns a plain dict since these
+    are single scalars, not a table.
+    """
+    latest = latest_snapshot(df)
+    client_latest = latest[latest["brand"] == client_brand]
+    client_oos_now = client_latest[client_latest["is_sold_out"]]
+
+    dur = stockout_duration_hours(df[df["brand"] == client_brand], only_affected=False)
+    hours_off_shelf = dur["oos_hours"].sum() if not dur.empty else 0.0
+
+    # Average total OOS hours so far, among the brand's SKUs that have actually
+    # had at least one stock-out episode - not a global average across all SKUs.
+    avg_outage_hours = dur[dur["oos_hours"] > 0]["oos_hours"].mean() if not dur.empty else None
+
+    non_client = latest[latest["brand"] != client_brand]
+    competitors_oos_now = int(non_client["is_sold_out"].sum()) if not non_client.empty else 0
+
+    return {
+        "skus_tracked": int(client_latest["product_id"].nunique()),
+        "skus_in_stock": int(client_latest["product_id"].nunique()) - int(client_oos_now["product_id"].nunique()),
+        "oos_now": int(client_oos_now["product_id"].nunique()),
+        "hours_off_shelf": round(float(hours_off_shelf), 1),
+        "avg_outage_hours": round(float(avg_outage_hours), 1) if avg_outage_hours is not None and pd.notna(avg_outage_hours) else None,
+        "competitors_oos_now": competitors_oos_now,
+    }
+
+
+def needs_attention(df: pd.DataFrame, client_brand: str, max_items: int = 4) -> pd.DataFrame:
+    """Real, actionable rows for the "Needs your attention" list: the client
+    brand's currently sold-out SKUs, worst-outage-first. (Nearby-store stock
+    and competitor-gap context are added live elsewhere - the "check nearby
+    stores" feature - since those require on-demand API calls, not something
+    safe to run automatically on every page load.)
+    """
+    cols = ["brand", "name", "location_name", "oos_hours", "oos_episodes"]
+    oos = current_oos_alerts(df[df["brand"] == client_brand])
+    if oos.empty:
+        return pd.DataFrame(columns=cols)
+    dur = stockout_duration_hours(df[df["brand"] == client_brand])
+    merged = oos.merge(dur, on=["platform", "location_name", "product_id", "brand", "name"], how="left")
+    merged["oos_hours"] = merged["oos_hours"].fillna(0.0)
+    merged["oos_episodes"] = merged["oos_episodes"].fillna(1).astype(int)
+    return merged.sort_values("oos_hours", ascending=False).head(max_items)[cols]
+
+
+def current_stockout_started_at(df: pd.DataFrame) -> pd.DataFrame:
+    """For each (platform, location, product) that is sold out right now, find
+    when the *current* sold-out streak actually began - i.e. the earliest
+    consecutive "is_sold_out" reading ending at the latest snapshot. Used for
+    an honest "since HH:MM" / "out for N minutes" figure instead of reusing the
+    latest check's timestamp (which would understate how long it's been out).
+    """
+    cols = ["platform", "location_name", "product_id", "brand", "name", "since"]
+    if df.empty:
+        return pd.DataFrame(columns=cols)
+
+    rows = []
+    key_cols = ["platform", "location_name", "product_id", "brand", "name"]
+    for keys, grp in df.sort_values("fetched_at").groupby(key_cols):
+        grp = grp.reset_index(drop=True)
+        if not bool(grp.iloc[-1]["is_sold_out"]):
+            continue  # not currently sold out
+        since = grp.iloc[-1]["fetched_at"]
+        for i in range(len(grp) - 1, -1, -1):
+            if bool(grp.iloc[i]["is_sold_out"]):
+                since = grp.iloc[i]["fetched_at"]
+            else:
+                break
+        rows.append(dict(zip(key_cols, keys), since=since))
+    return pd.DataFrame(rows, columns=cols)
+
+
 def depletion_forecast(df: pd.DataFrame, min_points: int = 3) -> pd.DataFrame:
     """Rough "time to stock-out" estimate per (platform, location, product) using the
     recent inventory decline velocity (units/hour) from the last few snapshots,

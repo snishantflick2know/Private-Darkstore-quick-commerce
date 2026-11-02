@@ -1,0 +1,91 @@
+/* =====================================================================
+   Shelf Pulse — design tokens
+   Every colour, radius and size used by app.css lives here.
+   Light theme is the default; add class "dark" on <html> for dark.
+   ===================================================================== */
+
+:root {
+  /* brand (your brand series, primary button, active nav) */
+  --brand: #6E5BFF;
+  --brand-soft: #F0EEFF;
+  --brand-ink: #4F3BDB;
+
+  /* surfaces */
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --surface-2: #F9FAFB;
+  --surface-3: #F2F4F7;
+  --line: #EAECF0;
+  --line-2: #D0D5DD;
+  --hover: #F7F8FA;
+
+  /* text */
+  --ink: #0D0F12;
+  --ink-2: #344054;
+  --muted: #475467;
+  --subtle: #667085;
+
+  /* competitor series — one fixed colour per brand, used in every chart */
+  --c-real: #0D9488;
+  --c-raw: #2563EB;
+  --c-bn: #DB2777;
+  --c-trop: #98A2B3;
+
+  /* status (only ever used for status) */
+  --crit: #D92D20;  --crit-bg: #FEF3F2;  --crit-ink: #B42318;
+  --warn: #DC6803;  --warn-bg: #FFFAEB;  --warn-ink: #B54708;
+  --ok:   #079455;  --ok-bg:   #ECFDF3;  --ok-ink:   #067647;
+  --info-bg: #EFF8FF; --info-ink: #175CD3;
+  --neutral-bg: #F2F4F7; --neutral-ink: #344054;
+
+  /* charts + map */
+  --grid: #EEF0F3;
+  --map-bg: #F2F4F7;
+  --map-road: #E0E3E8;
+  --map-river: rgba(37, 99, 235, .16);
+
+  /* shape */
+  --radius-card: 16px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --radius-badge: 6px;
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, .05);
+  --scrim: rgba(13, 15, 18, .32);
+
+  /* type */
+  --font: 'DM Sans', -apple-system, 'Segoe UI', sans-serif;
+  --fs-hero: 60px;      /* headline availability */
+  --fs-tile: 30px;      /* tile numbers */
+  --fs-page: 22px;      /* page title */
+  --fs-card: 15px;      /* card titles */
+  --fs-body: 14px;
+  --fs-small: 13px;
+  --fs-label: 12.5px;
+
+  /* layout */
+  --gap: 16px;
+  --page-pad-x: 28px;
+  --content-max: 1480px;
+  --rail-basis: 220px;
+
+  /* change-note markers */
+  --note: #7A5AF8;
+}
+
+.dark {
+  --brand: #8B7BFF;
+  --brand-soft: rgba(139, 123, 255, .14);
+  --brand-ink: #B9AFFF;
+  --bg: #0A0B0D; --surface: #111317; --surface-2: #161920; --surface-3: #1C2028;
+  --line: #22262E; --line-2: #2D323C; --hover: #171A20;
+  --ink: #F3F4F6; --ink-2: #D0D4DB; --muted: #9AA1AD; --subtle: #8A919D;
+  --c-real: #2DD4BF; --c-raw: #60A5FA; --c-bn: #F472B6; --c-trop: #A3ACB9;
+  --crit: #F97066; --crit-bg: rgba(249,112,102,.12); --crit-ink: #FDA29B;
+  --warn: #FDB022; --warn-bg: rgba(253,176,34,.12); --warn-ink: #FEC84B;
+  --ok: #47CD89;   --ok-bg: rgba(71,205,137,.12);   --ok-ink: #75E0A7;
+  --info-bg: rgba(96,165,250,.12); --info-ink: #93C5FD;
+  --neutral-bg: rgba(255,255,255,.06); --neutral-ink: #C3C8D0;
+  --grid: rgba(255,255,255,.06); --map-bg: #0E1014; --map-road: #20242C; --map-river: rgba(96,165,250,.2);
+  --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset;
+  --scrim: rgba(0,0,0,.55);
+}

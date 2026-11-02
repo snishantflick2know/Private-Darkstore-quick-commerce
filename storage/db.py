@@ -50,6 +50,17 @@ CREATE TABLE IF NOT EXISTS snapshots (
 );
 CREATE INDEX IF NOT EXISTS idx_snapshots_lookup
     ON snapshots (platform, location_name, product_id, fetched_at);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    brand TEXT NOT NULL,
+    product_name TEXT,
+    location_name TEXT,
+    message TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 """
 
 
@@ -99,4 +110,32 @@ def load_snapshots(db_path: str) -> pd.DataFrame:
         df["is_sold_out"] = df["is_sold_out"].astype(bool)
         df["is_synthetic"] = df["is_synthetic"].astype(bool)
         df["brand"] = df["brand"].map(_normalize_brand)
+    return df
+
+
+def save_notifications(db_path: str, notifications: Iterable[dict]) -> int:
+    """notifications: list of dicts with keys type, severity, brand, product_name,
+    location_name, message, created_at (ISO string)."""
+    rows = [
+        (n["type"], n["severity"], n["brand"], n.get("product_name"), n.get("location_name"),
+         n["message"], n["created_at"])
+        for n in notifications
+    ]
+    if not rows:
+        return 0
+    with _connect(db_path) as conn:
+        conn.executemany(
+            """INSERT INTO notifications
+               (type, severity, brand, product_name, location_name, message, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            rows,
+        )
+    return len(rows)
+
+
+def load_notifications(db_path: str) -> pd.DataFrame:
+    with _connect(db_path) as conn:
+        df = pd.read_sql_query("SELECT * FROM notifications ORDER BY created_at DESC", conn)
+    if not df.empty:
+        df["created_at"] = pd.to_datetime(df["created_at"])
     return df

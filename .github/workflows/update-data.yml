@@ -1,0 +1,39 @@
+name: Update Shelf Pulse data
+
+# Keeps the GitHub Pages dashboard genuinely live without any always-on
+# server: scrapes Blinkit, commits the updated SQLite history (so velocity
+# calculations like the depletion forecast have real, evenly-spaced data
+# points over time) and the regenerated static JSON snapshots.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python scripts/export_static_site.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "shelf-pulse-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/stock_tracker.db docs/data
+          git diff --cached --quiet || git commit -m "Auto-update live data [skip ci]"
+          git push

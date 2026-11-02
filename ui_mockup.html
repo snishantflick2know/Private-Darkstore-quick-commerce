@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shelf Pulse — Quick-Commerce Stock Intelligence (UI Mockup, dummy data)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --accent:#4f46e5; --ink:#111827; --muted:#6b7280; --border:#e8eaed;
+    --surface:#ffffff; --canvas:#f6f7fb;
+    --sidebar-bg:#0b1220; --sidebar-bg-alt:#141b2d; --sidebar-text:#cbd5e1; --sidebar-muted:#6b7a99;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--canvas);color:var(--ink);}
+
+  /* ===== NOTE BANNER (remove once redesigned; explains this is a mockup) ===== */
+  .mockup-note{
+    background:#111827;color:#fbbf24;font-size:12.5px;font-weight:600;text-align:center;
+    padding:8px 12px;letter-spacing:.02em;
+  }
+
+  /* ===== Layout shell ===== */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:260px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid #1e293b;
+    padding:18px 16px;color:var(--sidebar-text);
+  }
+  .main{flex:1;min-width:0;padding:18px 28px 40px;max-width:1440px;}
+
+  /* ===== Sidebar ===== */
+  .sb-brand{display:flex;align-items:center;gap:10px;padding:6px 0 20px 0;border-bottom:1px solid #1e293b;margin-bottom:16px;}
+  .sb-brand-badge{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#8b5cf6);
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+  }
+  .sb-brand-name{font-weight:800;color:#fff;font-size:1.02rem;line-height:1.1;}
+  .sb-brand-sub{font-size:.72rem;color:var(--sidebar-muted);margin-top:2px;}
+  .sb-section-label{
+    font-size:.68rem;font-weight:700;color:var(--sidebar-muted);text-transform:uppercase;
+    letter-spacing:.06em;margin:18px 0 8px 0;
+  }
+  .sb-caption{font-size:.72rem;color:var(--sidebar-muted);line-height:1.4;margin-bottom:8px;}
+  .sb-btn{
+    width:100%;background:var(--sidebar-bg-alt);border:1px solid #273449;color:#e2e8f0;
+    font-weight:600;font-size:.82rem;padding:8px 10px;border-radius:8px;cursor:pointer;
+  }
+  .sb-select, .sb-pills{
+    width:100%;background:var(--sidebar-bg-alt);border:1px solid #273449;color:#e2e8f0;
+    font-size:.82rem;padding:8px 10px;border-radius:8px;
+  }
+  .sb-pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .sb-pill{
+    font-size:.72rem;font-weight:600;padding:4px 9px;border-radius:999px;
+    background:#1e293b;border:1px solid #2f3e58;color:#cbd5e1;
+  }
+  .sb-pill.active{background:#4338ca;border-color:#4f46e5;color:#fff;}
+  .sb-check{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--sidebar-text);margin-top:10px;}
+
+  /* ===== Top toolbar ===== */
+  .toolbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .toolbar-title{font-size:1.18rem;font-weight:800;color:var(--ink);letter-spacing:-0.01em;margin:0;}
+  .toolbar-sub{font-size:.8rem;color:var(--muted);margin-top:2px;}
+  .pill{
+    display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;
+    font-size:.64rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;border:1px solid transparent;
+  }
+  .pill-live{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+
+  /* ===== KPI cards ===== */
+  .kpi-row{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .kpi-card{
+    flex:1 1 185px;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:12px 14px;box-shadow:0 1px 2px rgba(16,24,40,.03);
+  }
+  .kpi-head{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+  .kpi-icon{
+    width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-size:.78rem;flex-shrink:0;
+  }
+  .tone-indigo{background:#eef2ff;color:#4f46e5;}
+  .tone-red{background:#fef2f2;color:#dc2626;}
+  .tone-green{background:#f0fdf4;color:#16a34a;}
+  .tone-amber{background:#fffbeb;color:#d97706;}
+  .tone-purple{background:#faf5ff;color:#9333ea;}
+  .tone-slate{background:#f3f4f6;color:#374151;}
+  .kpi-title{font-size:.73rem;color:var(--ink);font-weight:700;line-height:1.15;}
+  .kpi-subtitle{font-size:.63rem;color:var(--muted);margin-top:0;}
+  .kpi-valrow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .kpi-value{font-size:1.4rem;font-weight:800;color:var(--ink);line-height:1.05;}
+  .kpi-meta{font-size:.65rem;color:var(--muted);margin-top:4px;}
+  .delta-chip{display:inline-flex;align-items:center;gap:2px;padding:0 7px;border-radius:999px;font-size:.68rem;font-weight:700;}
+  .delta-bad{background:#fef2f2;color:#dc2626;}
+  .delta-good{background:#f0fdf4;color:#15803d;}
+  .delta-flat{background:#f3f4f6;color:#4b5563;}
+  .kpi-footer{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;}
+  .kpi-detail-btn{
+    background:#fff;border:1px solid var(--border);border-radius:8px;font-size:.72rem;font-weight:600;
+    color:var(--muted);padding:6px;cursor:pointer;text-align:center;
+  }
+
+  /* ===== Card / section ===== */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(16,24,40,.04);}
+  .card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  .card-header-left{display:flex;align-items:flex-start;gap:10px;}
+  .card-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.92rem;flex-shrink:0;}
+  .card-title{font-size:.92rem;font-weight:700;color:var(--ink);line-height:1.25;}
+  .card-subtitle{font-size:.74rem;color:var(--muted);margin-top:2px;max-width:640px;}
+  .dl-btn{
+    background:#fff;border:1px solid var(--border);border-radius:8px;font-size:.72rem;font-weight:600;
+    color:var(--ink);padding:5px 10px;cursor:pointer;white-space:nowrap;height:fit-content;
+  }
+
+  /* ===== Tabs ===== */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+  .tab-btn{
+    background:none;border:none;font-weight:600;font-size:.88rem;color:var(--muted);
+    padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ===== Tables ===== */
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  thead th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+    border-bottom:1px solid var(--border);padding:8px 10px;font-weight:700;
+  }
+  tbody td{padding:9px 10px;border-bottom:1px solid #f1f2f6;color:var(--ink);}
+  tbody tr:last-child td{border-bottom:none;}
+  .table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .badge-oos{color:#dc2626;font-weight:700;}
+  .badge-ok{color:#16a34a;font-weight:700;}
+  .badge-sim{font-size:.68rem;background:#fffbeb;color:#b45309;padding:2px 6px;border-radius:6px;}
+  .progress-track{background:#f1f2f6;border-radius:6px;height:14px;width:100%;position:relative;overflow:hidden;min-width:80px;}
+  .progress-fill{background:var(--accent);height:100%;}
+  .progress-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#1f2937;}
+
+  /* ===== Map tab ===== */
+  .map-grid{display:flex;gap:18px;}
+  .map-image-wrap{flex:2.2;}
+  .map-placeholder{
+    width:100%;aspect-ratio:16/10;border-radius:10px;border:1px dashed #c7cbe0;
+    background:repeating-linear-gradient(45deg,#f3f4fb,#f3f4fb 10px,#eceef7 10px,#eceef7 20px);
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem;text-align:center;padding:12px;
+  }
+  .map-legend{flex:1;}
+  .legend-row{display:flex;align-items:center;gap:6px;font-size:.78rem;margin-bottom:8px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  /* ===== Outbox ===== */
+  .notif-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .notif-chip{font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:#f8f9fc;color:var(--ink);}
+  .notif-chip.active{background:#eef2ff;border-color:#c7d2fe;color:#4338ca;}
+  .notif-item{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid #f1f2f6;font-size:.83rem;}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-ts{color:var(--muted);font-weight:700;white-space:nowrap;}
+  .footer-note{font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5;}
+  .chart-wrap{height:340px;}
+  .section-gap{height:14px;}
+</style>
+</head>
+<body>
+
+<div class="mockup-note">
+  STATIC MOCKUP WITH DUMMY DATA — for UI/UX redesign only. Structure/content mirrors the real Streamlit app
+  (sidebar, KPI row, 6 tabs: Map / OOS Alerts / Benchmarking / Depletion Forecast / Trends / Outbox). No live data, no real interactivity beyond tab switching.
+</div>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-badge">🛒</div>
+      <div>
+        <div class="sb-brand-name">Shelf Pulse</div>
+        <div class="sb-brand-sub">Sohna Road + Lajpat Nagar · Blinkit · live</div>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Refresh</div>
+    <div class="sb-caption">Live data is 4 min old. Auto-refreshes every 10 min.</div>
+    <button class="sb-btn">🔄 Refresh now</button>
+
+    <div class="sb-section-label">Primary brand</div>
+    <select class="sb-select">
+      <option>Paper Boat</option>
+      <option>B Natural</option>
+      <option>Real</option>
+      <option>Tropicana</option>
+      <option>Raw Pressery</option>
+    </select>
+
+    <div class="sb-section-label">Filters</div>
+    <div class="sb-caption" style="margin-bottom:4px;">Brands</div>
+    <div class="sb-pill-row">
+      <span class="sb-pill active">Paper Boat</span>
+      <span class="sb-pill active">B Natural</span>
+      <span class="sb-pill active">Real</span>
+      <span class="sb-pill active">Tropicana</span>
+      <span class="sb-pill active">Raw Pressery</span>
+    </div>
+
+    <label class="sb-check">
+      <input type="checkbox" checked /> Live data only
+    </label>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <p class="toolbar-title">🛒 Paper Boat's Stock Intelligence</p>
+        <p class="toolbar-sub">Live from Blinkit — shelf availability, competitive benchmarking & stock-out risk</p>
+      </div>
+      <div><span class="pill pill-live">● Live · updated 4 min ago</span></div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <div class="kpi-icon tone-indigo">📦</div>
+          <div><div class="kpi-title">Paper Boat's SKUs</div><div class="kpi-subtitle">Tracked across locations</div></div>
+        </div>
+        <div class="kpi-valrow"><div class="kpi-value">34</div></div>
+        <div class="kpi-meta">No comparison for a count metric</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <div class="kpi-icon tone-red">🚨</div>
+          <div><div class="kpi-title">Paper Boat's OOS Now</div><div class="kpi-subtitle">Currently sold-out SKUs</div></div>
+        </div>
+        <div class="kpi-valrow"><div class="kpi-value">5</div><span class="delta-chip delta-bad">▲ 2</span></div>
+        <div class="kpi-meta">vs previous check (3 then)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <div class="kpi-icon tone-green">📈</div>
+          <div><div class="kpi-title">Avg Availability</div><div class="kpi-subtitle">Share of checks found in stock</div></div>
+        </div>
+        <div class="kpi-valrow"><div class="kpi-value">86%</div><span class="delta-chip delta-good">▼ 3pp</span></div>
+        <div class="kpi-meta">vs previous check (89% then)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <div class="kpi-icon tone-purple">🏆</div>
+          <div><div class="kpi-title">Top Competitor</div><div class="kpi-subtitle">By availability %</div></div>
+        </div>
+        <div class="kpi-valrow"><div class="kpi-value">Real</div></div>
+        <div class="kpi-meta">vs. Paper Boat across tracked brands</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <div class="kpi-icon tone-slate">🏷️</div>
+          <div><div class="kpi-title">Brands Compared</div><div class="kpi-subtitle">Paper Boat + competitors</div></div>
+        </div>
+        <div class="kpi-valrow"><div class="kpi-value">5</div></div>
+        <div class="kpi-meta">in current filter selection</div>
+      </div>
+    </div>
+    <div class="kpi-footer">
+      <div class="kpi-detail-btn">📦 Details</div>
+      <div class="kpi-detail-btn">🚨 Details</div>
+      <div class="kpi-detail-btn">📈 Details</div>
+      <div class="kpi-detail-btn">🏆 Details</div>
+      <div class="kpi-detail-btn">🏷️ Details</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('map')">🗺️ Map</button>
+      <button class="tab-btn" onclick="showTab('oos')">🚨 OOS Alerts</button>
+      <button class="tab-btn" onclick="showTab('bench')">📊 Benchmarking</button>
+      <button class="tab-btn" onclick="showTab('forecast')">🔮 Depletion Forecast</button>
+      <button class="tab-btn" onclick="showTab('trends')">📈 Trends</button>
+      <button class="tab-btn" onclick="showTab('outbox')">📬 Outbox</button>
+    </div>
+
+    <!-- ===== TAB: MAP ===== -->
+    <div id="tab-map" class="tab-panel active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-indigo">🗺️</div>
+            <div>
+              <div class="card-title">Dark-store health map</div>
+              <div class="card-subtitle">Tracked locations, color-coded by overall out-of-stock severity</div>
+            </div>
+          </div>
+        </div>
+        <div class="map-grid">
+          <div class="map-image-wrap">
+            <div class="map-placeholder">
+              [ Static street-map image render goes here — two markers: Sohna Road (🟢), Lajpat Nagar (🟠),<br/>
+              with a translucent illustrative coverage circle around each, numbered pins ]
+            </div>
+            <p class="footer-note">Marker size = SKUs tracked. Color = overall OOS severity (🟢 &lt;10% OOS, 🟠 10-30%, 🔴 &gt;30%). The translucent circle is illustrative only, not a real delivery-radius boundary.</p>
+          </div>
+          <div class="map-legend">
+            <strong style="font-size:.8rem;">Legend</strong>
+            <div style="margin:8px 0 14px;">
+              <div class="legend-row"><span class="dot" style="background:#16a34a"></span> Healthy</div>
+              <div class="legend-row"><span class="dot" style="background:#f59e0b"></span> Watch</div>
+              <div class="legend-row"><span class="dot" style="background:#dc2626"></span> Critical</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Location</th><th>Status</th><th>OOS %</th><th>Paper Boat's OOS</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>Sohna Road</td><td>🟢 Healthy</td><td>6%</td><td>2</td></tr>
+                  <tr><td>2</td><td>Lajpat Nagar</td><td>🟠 Watch</td><td>18%</td><td>3</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: OOS ALERTS ===== -->
+    <div id="tab-oos" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-red">🚨</div>
+            <div>
+              <div class="card-title">Out-of-stock right now</div>
+              <div class="card-subtitle">Latest snapshot per SKU, filtered to currently sold-out items</div>
+            </div>
+          </div>
+          <button class="dl-btn">⬇ CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Location</th><th>Brand</th><th>Name</th><th>Unit</th><th>Price</th><th>Observed at</th><th>Simulated</th></tr></thead>
+            <tbody>
+              <tr><td>Sohna Road</td><td>Paper Boat</td><td>Aamras</td><td>200ml</td><td>₹30</td><td>30 Oct, 11:42 AM</td><td></td></tr>
+              <tr><td>Sohna Road</td><td>Paper Boat</td><td>Jaljeera</td><td>250ml</td><td>₹35</td><td>30 Oct, 11:42 AM</td><td></td></tr>
+              <tr><td>Lajpat Nagar</td><td>Paper Boat</td><td>Alphonso Mango</td><td>1L</td><td>₹99</td><td>30 Oct, 11:40 AM</td><td></td></tr>
+              <tr><td>Lajpat Nagar</td><td>Real</td><td>Mixed Fruit</td><td>1L</td><td>₹110</td><td>30 Oct, 11:40 AM</td><td></td></tr>
+              <tr><td>Sohna Road</td><td>Tropicana</td><td>Orange Delight</td><td>1L</td><td>₹115</td><td>30 Oct, 11:42 AM</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-indigo">🔎</div>
+            <div>
+              <div class="card-title">Check nearby stores</div>
+              <div class="card-subtitle">For Paper Boat's currently out-of-stock SKUs, check if a nearby Blinkit dark store has them in stock — a stockout at the nearest store doesn't always mean the area is actually out (validated finding: a secondary store had 6 units while the primary had 0).</div>
+            </div>
+          </div>
+        </div>
+        <p class="footer-note">3 Paper Boat SKU(s) out of stock. This checks each against up to 3 nearby stores (slow — ~1 request/second to avoid rate limits).</p>
+        <button class="sb-btn" style="width:auto;background:var(--accent);border-color:var(--accent);color:#fff;padding:8px 16px;">🔍 Check nearby stores now</button>
+        <div class="section-gap"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>SKU</th><th>Location</th><th>Store</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>Aamras</td><td>Sohna Road</td><td>31719</td><td class="badge-ok">✅ in stock — 6 units</td></tr>
+              <tr><td>Aamras</td><td>Sohna Road</td><td>49971</td><td class="badge-oos">also sold out</td></tr>
+              <tr><td>Jaljeera</td><td>Sohna Road</td><td>31719</td><td>doesn't carry this product</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-amber">⏱️</div>
+            <div>
+              <div class="card-title">Stock-out frequency & duration</div>
+              <div class="card-subtitle">SKUs that have actually gone out of stock at least once (healthy SKUs with zero stock-outs are not listed here)</div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Brand</th><th>Name</th><th>Location</th><th>Stock-out events</th><th>Total hours OOS</th></tr></thead>
+            <tbody>
+              <tr><td>Paper Boat</td><td>Aamras</td><td>Sohna Road</td><td>4</td><td>11.5</td></tr>
+              <tr><td>Paper Boat</td><td>Jaljeera</td><td>Sohna Road</td><td>2</td><td>5.0</td></tr>
+              <tr><td>Tropicana</td><td>Orange Delight</td><td>Sohna Road</td><td>1</td><td>2.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: BENCHMARKING ===== -->
+    <div id="tab-bench" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-purple">📊</div>
+            <div>
+              <div class="card-title">Competitive benchmarking</div>
+              <div class="card-subtitle">Availability % by brand across tracked locations</div>
+            </div>
+          </div>
+          <button class="dl-btn">⬇ CSV</button>
+        </div>
+        <div class="chart-wrap"><canvas id="benchChart"></canvas></div>
+        <details style="margin-top:10px;">
+          <summary style="font-size:.8rem;color:var(--muted);cursor:pointer;">Raw availability table</summary>
+          <div class="table-wrap" style="margin-top:8px;">
+            <table>
+              <thead><tr><th>Brand</th><th>Platform</th><th>Availability %</th><th>Observations</th></tr></thead>
+              <tbody>
+                <tr><td>Paper Boat</td><td>Blinkit</td><td><div class="progress-track"><div class="progress-fill" style="width:86%"></div><div class="progress-label">86%</div></div></td><td>94</td></tr>
+                <tr><td>Real</td><td>Blinkit</td><td><div class="progress-track"><div class="progress-fill" style="width:93%"></div><div class="progress-label">93%</div></div></td><td>61</td></tr>
+                <tr><td>Tropicana</td><td>Blinkit</td><td><div class="progress-track"><div class="progress-fill" style="width:79%"></div><div class="progress-label">79%</div></div></td><td>37</td></tr>
+                <tr><td>B Natural</td><td>Blinkit</td><td><div class="progress-track"><div class="progress-fill" style="width:88%"></div><div class="progress-label">88%</div></div></td><td>32</td></tr>
+                <tr><td>Raw Pressery</td><td>Blinkit</td><td><div class="progress-track"><div class="progress-fill" style="width:91%"></div><div class="progress-label">91%</div></div></td><td>93</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- ===== TAB: DEPLETION FORECAST ===== -->
+    <div id="tab-forecast" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-indigo">🔮</div>
+            <div>
+              <div class="card-title">Depletion forecast</div>
+              <div class="card-subtitle">Estimated time to stock-out, based on recent inventory decline velocity</div>
+            </div>
+          </div>
+        </div>
+        <p class="footer-note">Heuristic, not a trained demand model — needs real repeated polling history (not a single snapshot) to be meaningful in production.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Brand</th><th>Name</th><th>Location</th><th>Current stock</th><th>Est. hours to stock-out</th></tr></thead>
+            <tbody>
+              <tr><td>Paper Boat</td><td>Kala Khatta</td><td>Sohna Road</td><td>3</td><td>2.5 h</td></tr>
+              <tr><td>Paper Boat</td><td>Jamun</td><td>Lajpat Nagar</td><td>5</td><td>6.0 h</td></tr>
+              <tr><td>Real</td><td>Mixed Fruit</td><td>Sohna Road</td><td>8</td><td>14.0 h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: TRENDS ===== -->
+    <div id="tab-trends" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-green">📈</div>
+            <div>
+              <div class="card-title">Inventory trend</div>
+              <div class="card-subtitle">Pick a product to see its inventory level over time</div>
+            </div>
+          </div>
+        </div>
+        <select class="sb-select" style="max-width:320px;background:#fff;color:var(--ink);border-color:var(--border);margin-bottom:14px;">
+          <option>Paper Boat – Aamras (200ml)</option>
+          <option>Real – Mixed Fruit (1L)</option>
+        </select>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: OUTBOX ===== -->
+    <div id="tab-outbox" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon tone-amber">📬</div>
+            <div>
+              <div class="card-title">Outbox</div>
+              <div class="card-subtitle">Every alert that would have been sent (stockouts, restocks, low-stock, new SKUs, delistings) — logged here instead of emailed/Slacked, so no external integration is needed for the demo.</div>
+            </div>
+          </div>
+          <button class="dl-btn">⬇ CSV</button>
+        </div>
+        <div class="notif-filters">
+          <span class="notif-chip active">stockout</span>
+          <span class="notif-chip active">low_stock</span>
+          <span class="notif-chip active">new_sku</span>
+          <span class="notif-chip active">delisted</span>
+          <span class="notif-chip active">competitor_gap</span>
+        </div>
+        <div>
+          <div class="notif-item"><span>🔴</span><div><span class="notif-ts">30 Oct, 11:42 AM</span> — Paper Boat "Aamras" (200ml) went out of stock at Sohna Road.</div></div>
+          <div class="notif-item"><span>🟠</span><div><span class="notif-ts">30 Oct, 11:42 AM</span> — Paper Boat "Jaljeera" (250ml) is low on stock (2 units left) at Sohna Road.</div></div>
+          <div class="notif-item"><span>🔵</span><div><span class="notif-ts">30 Oct, 11:40 AM</span> — New SKU detected: Paper Boat "Guava Twist" (200ml) at Lajpat Nagar.</div></div>
+          <div class="notif-item"><span>🔴</span><div><span class="notif-ts">30 Oct, 11:38 AM</span> — Paper Boat "Alphonso Mango" (1L) appears to have been delisted at Lajpat Nagar (no longer found in catalog).</div></div>
+          <div class="notif-item"><span>🟠</span><div><span class="notif-ts">30 Oct, 11:35 AM</span> — Competitive gap: Real "Mixed Fruit" is in stock at Sohna Road while Paper Boat's equivalent SKU is sold out.</div></div>
+          <div class="notif-item"><span>🟢</span><div><span class="notif-ts">30 Oct, 10:58 AM</span> — Paper Boat "Litchi" (200ml) is back in stock at Sohna Road.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note">⚠️ Data sourcing note: Blinkit data is pulled live from an unofficial/reverse-engineered API, not a published partner feed, and is for demo purposes only. A production deployment should use a licensed data partner or a direct data-sharing agreement with Blinkit.</p>
+
+  </main>
+</div>
+
+<script>
+  function showTab(id){
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // Dummy bar chart - Benchmarking
+  new Chart(document.getElementById('benchChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Paper Boat', 'Real', 'Tropicana', 'B Natural', 'Raw Pressery'],
+      datasets: [{
+        label: 'Availability %',
+        data: [86, 93, 79, 88, 91],
+        backgroundColor: ['#4f46e5', '#16a34a', '#f59e0b', '#ec4899', '#0ea5e9'],
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, max: 100, grid: { color: '#f0f1f5' } }, x: { grid: { display: false } } }
+    }
+  });
+
+  // Dummy line chart - Trends
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00'],
+      datasets: [{
+        label: 'Inventory (units)',
+        data: [18, 15, 10, 6, 2, 0],
+        borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.08)',
+        fill: true, tension: 0.3, pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, grid: { color: '#f0f1f5' } }, x: { grid: { display: false } } }
+    }
+  });
+</script>
+
+</body>
+</html>
