@@ -34,6 +34,7 @@ const state = {
   productBrand: 'All',
   productStore: 'All',
   productView: 'latest',
+  productSearch: '',
   store: params.has('store') ? Number(params.get('store')) : -1,  // index into data.stores, -1 = panel closed
   theme: readTheme(),
   busy: false
@@ -181,6 +182,28 @@ document.addEventListener('click', e => {
     default: return;
   }
   render();
+});
+
+/* Input handler - the Metadata page's product search box. Filtered in the
+   DOM directly (show/hide rows) instead of via state + re-render, so typing
+   doesn't lose input focus on every keystroke. The query is still stored in
+   state so it survives the Latest/History toggle and chip filters. */
+document.addEventListener('input', e => {
+  const el = e.target.closest('[data-action="product-search"]');
+  if (!el) return;
+  state.productSearch = el.value;
+  const q = el.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('#products-table .trow').forEach(r => {
+    const show = !q || (r.dataset.search || '').includes(q);
+    r.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const empty = document.getElementById('products-no-match');
+  if (empty) {
+    empty.style.display = visible ? 'none' : '';
+    empty.textContent = `No rows match "${el.value.trim()}".`;
+  }
 });
 
 /* Change handler - for the brand <select> in the left nav. */

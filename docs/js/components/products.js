@@ -4,6 +4,7 @@
    equivalent in the redesigned pages, so it's added here rather than lost.
    Not part of the original canvas/data.js contract - see data.products. */
 import { esc, badge } from '../util.js';
+import { icon } from '../icons.js';
 
 export function productCatalog(data, state) {
   const brandFilter = state.productBrand || 'All';
@@ -16,15 +17,19 @@ export function productCatalog(data, state) {
     <button type="button" class="chip ${storeFilter === name ? 'on' : ''}" data-action="product-store-filter" data-value="${esc(name)}">${esc(name)}</button>`).join('');
 
   const source = view === 'history' ? (data.snapshotHistory || []) : (data.products || []);
+  const q = (state.productSearch || '').trim().toLowerCase();
   const products = source
     .filter(p => brandFilter === 'All' || p.brand === brandFilter)
-    .filter(p => storeFilter === 'All' || p.store === storeFilter);
+    .filter(p => storeFilter === 'All' || p.store === storeFilter)
+    // Same query the live input handler applies in the DOM - also enforced at
+    // render time so the filter survives re-renders (chip/view toggles).
+    .filter(p => !q || `${p.brand} ${p.product} ${p.pack} ${p.store} ${p.merchantId || ''}`.toLowerCase().includes(q));
   // History can be thousands of rows - cap what the DOM renders (newest first,
   // already sorted that way by the backend) and say so rather than hanging the page.
   const MAX_ROWS = 500;
   const shown = products.slice(0, MAX_ROWS);
   const rows = shown.map(p => `
-    <div class="trow cols-products">
+    <div class="trow cols-products" data-search="${esc(`${p.brand} ${p.product} ${p.pack} ${p.store} ${p.merchantId || ''}`.toLowerCase())}">
       <span style="font-weight:500">${esc(p.brand)}</span>
       <span><span class="cell-main">${esc(p.product)}</span><span class="cell-sub">${esc(p.pack)}</span></span>
       <span>${esc(p.store)}</span>
@@ -45,6 +50,7 @@ export function productCatalog(data, state) {
     <div class="card-head">
       <div><h2 class="card-title">All products</h2><p class="card-sub">${sub}</p></div>
       <div style="display:flex;gap:8px;align-items:center">
+        <label class="search">${icon('search', 'sm')}<input type="search" placeholder="Search products, brands, stores..." data-action="product-search" value="${esc(state.productSearch || '')}"></label>
         <div class="chips" role="group" aria-label="Rows shown">
           <button type="button" class="chip ${view === 'latest' ? 'on' : ''}" data-action="product-view" data-value="latest">Latest only</button>
           <button type="button" class="chip ${view === 'history' ? 'on' : ''}" data-action="product-view" data-value="history">Full history</button>
@@ -54,9 +60,10 @@ export function productCatalog(data, state) {
     </div>
     <div class="chips" role="group" aria-label="Filter by brand" style="margin-bottom:8px">${brandChips}</div>
     <div class="chips" role="group" aria-label="Filter by store">${storeChips}</div>
-    <div class="tscroll">
+    <div class="tscroll" id="products-table">
       <div class="thead cols-products"><span>Brand</span><span>Product</span><span>Store</span><span>Merchant ID</span><span class="r">Price</span><span class="r">MRP</span><span class="r">Inventory</span><span>Status</span><span>Captured at</span></div>
       ${rows || '<div class="panel-empty" style="padding:20px">No products found for this filter.</div>'}
+      <div class="panel-empty" id="products-no-match" style="padding:20px;display:none">No rows match "${esc(state.productSearch || '')}".</div>
       ${products.length > MAX_ROWS ? `<div class="panel-empty" style="padding:12px">Showing the newest ${MAX_ROWS} of ${products.length} rows - narrow the brand/store filters to see more.</div>` : ''}
     </div>
   </section>`;
