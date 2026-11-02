@@ -20,6 +20,7 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from fastapi import FastAPI, Query
@@ -27,6 +28,20 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 logger = logging.getLogger("shelf_pulse.server")
+
+# Everything is stored/computed internally in UTC (see storage/db.py) - this
+# is purely a display-layer conversion for the India-based audience, applied
+# right before formatting any *absolute* clock time (capturedAt, alert times,
+# stock-out "since"). Relative figures (minutes-ago, hours-off-shelf, etc.)
+# don't need this since a duration is the same length in any timezone.
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def _ist(ts) -> pd.Timestamp:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return t.tz_convert(IST)
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -116,7 +131,10 @@ def _avail_pct(df: pd.DataFrame, brand: str) -> float | None:
 
 
 def _day_buckets(df: pd.DataFrame, max_days: int = 7) -> list[pd.Timestamp]:
-    days = sorted(pd.to_datetime(df["fetched_at"]).dt.date.unique())
+    # Bucketed by IST calendar date, not UTC - a 19:00 UTC reading is already
+    # past midnight the next day in IST, so UTC-date bucketing would show it
+    # under the wrong day for an India-based audience.
+    days = sorted(df["fetched_at"].map(lambda t: _ist(t).date()).unique())
     days = days[-max_days:]
     if len(days) == 1:
         days = days * 2  # a single real day, shown twice so the line chart doesn't divide by zero
@@ -243,7 +261,7 @@ def build_dashboard(brand: str | None = None) -> dict:
     days = _day_buckets(df)
     day_labels = [d.strftime("%-d %b") if hasattr(d, "strftime") else str(d) for d in days]
     dfd = df.copy()
-    dfd["_date"] = pd.to_datetime(dfd["fetched_at"]).dt.date
+    dfd["_date"] = dfd["fetched_at"].map(lambda t: _ist(t).date())
     series = []
     for b in brand_names:
         row = []
@@ -348,7 +366,7 @@ def build_dashboard(brand: str | None = None) -> dict:
             times_this_week = int(dur_row.iloc[0]["oos_episodes"]) if not dur_row.empty else 1
             stockouts.append({
                 "product": row["name"], "pack": row["unit"] or "", "mrp": round(float(row["mrp"] or row["price"] or 0)),
-                "store": row["location_name"], "since": pd.Timestamp(since_ts).strftime("%H:%M"),
+                "store": row["location_name"], "since": _ist(since_ts).strftime("%H:%M"),
                 "minutesOut": minutes_out, "timesThisWeek": times_this_week,
                 # Real-time multi-store checks are rate-limited and only run
                 # on demand (POST /api/nearby), not automatically for every
@@ -424,7 +442,7 @@ def build_dashboard(brand: str | None = None) -> dict:
             # rows here can span the full 30-day retention window, not just
             # "today" - there's no existing frontend helper for formatting an
             # arbitrary past date, only same-day "HH:MM" (see util.js clock()).
-            "capturedAt": pd.Timestamp(r["fetched_at"]).strftime("%d %b, %H:%M") + " UTC",
+            "capturedAt": _ist(r["fetched_at"]).strftime("%d %b, %H:%M") + " IST",
         })
 
     # ---- alerts ----
@@ -433,7 +451,7 @@ def build_dashboard(brand: str | None = None) -> dict:
     if not notif_df.empty:
         for _, r in notif_df.head(100).iterrows():
             alerts.append({
-                "time": pd.Timestamp(r["created_at"]).strftime("%H:%M"),
+                "time": _ist(r["created_at"]).strftime("%H:%M"),
                 "type": ALERT_TYPE_LABELS.get(r["type"], r["type"]),
                 "text": r["message"],
             })
