@@ -21,7 +21,7 @@ export function storePanel(data, storeIndex) {
   const missing = outHere.length
     ? outHere.map(o => `
       <div class="panel-oos">
-        <span><span class="cell-main">${esc(o.product)} ${esc(o.pack)}</span><span class="cell-sub">Out for ${duration(o.minutesOut)}</span></span>
+        <span><span class="cell-main">${esc(o.product)} ${esc(o.pack)}</span><span class="cell-sub">Out for ${esc(o.outRange || duration(o.minutesOut))}</span></span>
         ${badge(o.nearby.tone, o.nearby.text)}
       </div>`).join('')
     : `<div class="panel-empty">No stock-outs for your brand at this store right now.</div>`;

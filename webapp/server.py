@@ -43,6 +43,38 @@ def _ist(ts) -> pd.Timestamp:
         t = t.tz_localize("UTC")
     return t.tz_convert(IST)
 
+
+def _fmt_dur(minutes: int) -> str:
+    if minutes >= 60:
+        h, m = divmod(minutes, 60)
+        return f"{h}h {m}m" if m else f"{h}h"
+    return f"{minutes} min"
+
+
+def _fmt_window(a, b) -> str:
+    """'23:10–00:18' within a day, else '02 Nov 23:10 – 03 Nov 00:18'."""
+    ta, tb = _ist(a), _ist(b)
+    if ta.date() == tb.date():
+        return f"{ta.strftime('%H:%M')}–{tb.strftime('%H:%M')}"
+    return f"{ta.strftime('%d %b %H:%M')} – {tb.strftime('%d %b %H:%M')}"
+
+
+def _in_peak(ts) -> bool:
+    if ts is None or pd.isna(ts):
+        return False
+    return PEAK_START_HOUR_IST <= _ist(ts).hour < PEAK_END_HOUR_IST
+
+
+def _out_bounds(first_out, last_in, now) -> tuple[int, str]:
+    """(lower-bound minutes out, display range) for an open stock-out window:
+    '45 min–1h 45m' when both bounds exist, '>45 min' when the product was
+    already out at our first-ever observation (true duration unknowable)."""
+    lo = max(0, int((now - pd.Timestamp(first_out)).total_seconds() / 60))
+    if last_in is None or pd.isna(last_in):
+        return lo, f">{_fmt_dur(lo)}"
+    hi = max(lo, int((now - pd.Timestamp(last_in)).total_seconds() / 60))
+    return lo, f"{_fmt_dur(lo)}–{_fmt_dur(hi)}"
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -50,13 +82,16 @@ from analytics.metrics import (  # noqa: E402
     availability_by_brand,
     availability_by_store_brand,
     current_oos_alerts,
-    current_stockout_started_at,
+    current_stockout_window,
     depletion_forecast,
     latest_snapshot,
+    oos_hours_by_daypart,
     oos_summary_stats,
     previous_snapshot,
     stock_on_shelf_by_brand,
     stockout_duration_hours,
+    PEAK_START_HOUR_IST,
+    PEAK_END_HOUR_IST,
 )
 from analytics.notifications import generate_notifications  # noqa: E402
 from config import (  # noqa: E402
@@ -244,6 +279,11 @@ def build_dashboard(brand: str | None = None) -> dict:
         prior_dur = stockout_duration_hours(prior_df[prior_df["brand"] == client_brand], only_affected=False)
         prior_hours_off_shelf = float(prior_dur["oos_hours"].sum()) if not prior_dur.empty else 0.0
 
+    # Peak (6-11 PM IST) vs off-peak split - a stock-out during peak selling
+    # hours costs far more than an overnight one.
+    daypart = oos_hours_by_daypart(df[df["brand"] == client_brand])
+    peak_hours_off_shelf = float(daypart.iloc[0]["oos_hours_peak"]) if not daypart.empty else 0.0
+
     headline = {
         "availabilityPct": client_pct,
         "previousPct": round(prev_client_pct) if prev_client_pct is not None else client_pct,
@@ -252,6 +292,7 @@ def build_dashboard(brand: str | None = None) -> dict:
         "leaderName": leader_name,
         "pointsBehindLeader": round(points_behind_leader),
         "hoursOffShelf": round(stats["hours_off_shelf"]),
+        "peakHoursOffShelf": round(peak_hours_off_shelf, 1),
         "hoursOffShelfChange": round(stats["hours_off_shelf"] - prior_hours_off_shelf, 1),
         "averageOutageMinutes": round(stats["avg_outage_hours"] * 60) if stats["avg_outage_hours"] is not None else 0,
     }
@@ -297,6 +338,18 @@ def build_dashboard(brand: str | None = None) -> dict:
     prev_competitors_oos = int(non_client_prev["is_sold_out"].sum()) if not non_client_prev.empty else competitors_oos_now
     competitor_delta_n = competitors_oos_now - prev_competitors_oos
 
+    client_oos_latest = current_oos_alerts(df)
+    client_oos_latest = client_oos_latest[client_oos_latest["brand"] == client_brand] if not client_oos_latest.empty else client_oos_latest
+
+    # Which competitor brands still have stock at each store right now -
+    # powers the "share gap" opportunity metric: your SKU is out while a
+    # rival can still capture the sale at the same dark store.
+    comp_in_stock_by_store = {
+        loc: sorted(latest[(latest["location_name"] == loc) & (latest["brand"] != client_brand) & (~latest["is_sold_out"])]["brand"].unique())
+        for loc in _TRACKED_LOCATION_NAMES
+    }
+    gap_count = int(sum(1 for _, r in client_oos_latest.iterrows() if comp_in_stock_by_store.get(r["location_name"])))
+
     def _flat_trend(value: float, n: int) -> list[float]:
         # We don't have reliable historical reconstruction for every tile yet
         # (e.g. forecast / nearby-stock counts aren't stored per day) - a flat
@@ -327,9 +380,9 @@ def build_dashboard(brand: str | None = None) -> dict:
             "trend": _flat_trend(len(running_out_soon), len(days)),
         },
         {
-            "label": "Stock at nearby stores", "value": 0, "unit": f"of {client_oos_now}",
-            "delta": "", "deltaTone": "good", "note": "Run a check from Stock-outs", "tone": "ok",
-            "trend": _flat_trend(0, len(days)),
+            "label": "Share gaps right now", "value": gap_count, "unit": f"of {client_oos_now} products out",
+            "delta": "", "deltaTone": "bad", "note": "of your out-of-stock products sit at a store where a rival still has stock - the sale goes to them", "tone": "crit",
+            "trend": _flat_trend(gap_count, len(days)),
         },
         {
             "label": "Competitors out of stock", "value": competitors_oos_now, "unit": "products",
@@ -341,8 +394,6 @@ def build_dashboard(brand: str | None = None) -> dict:
 
     # ---- stores (store x brand availability grid + schematic map) ----
     store_brand = availability_by_store_brand(df)
-    client_oos_latest = current_oos_alerts(df)
-    client_oos_latest = client_oos_latest[client_oos_latest["brand"] == client_brand] if not client_oos_latest.empty else client_oos_latest
     stores = []
     for loc in _TRACKED_LOCATION_NAMES:
         values = []
@@ -353,26 +404,38 @@ def build_dashboard(brand: str | None = None) -> dict:
         stores.append({"name": loc, "city": city, "values": values, "map": MAP_POSITIONS.get(loc, _DEFAULT_MAP_POS)})
 
     # ---- stock-outs (client brand) ----
-    since_df = current_stockout_started_at(df[df["brand"] == client_brand])
+    # Interval-censored windows, not point estimates: a product observed in
+    # stock at 12:00 and out at 1:00 went out *sometime in that hour* - the
+    # honest bound is (last in-stock check, first out-of-stock check), and it
+    # tightens as check frequency increases. FMCG-correct framing.
+    window_df = current_stockout_window(df[df["brand"] == client_brand])
     dur_df = stockout_duration_hours(df[df["brand"] == client_brand])
     now = pd.Timestamp.now(tz="UTC")
     stockouts = []
     if not client_oos_latest.empty:
         for _, row in client_oos_latest.iterrows():
-            since_row = since_df[(since_df["location_name"] == row["location_name"]) & (since_df["product_id"] == row["product_id"])]
-            since_ts = since_row.iloc[0]["since"] if not since_row.empty else row["fetched_at"]
-            minutes_out = max(0, int((now - pd.Timestamp(since_ts)).total_seconds() / 60))
+            w = window_df[(window_df["location_name"] == row["location_name"]) & (window_df["product_id"] == row["product_id"])]
+            first_out = w.iloc[0]["first_out_at"] if not w.empty else row["fetched_at"]
+            last_in = w.iloc[0]["last_in_stock_at"] if not w.empty else None
+            has_last_in = last_in is not None and pd.notna(last_in)
+            minutes_out, out_range = _out_bounds(first_out, last_in, now)
+            out_between = _fmt_window(last_in, first_out) if has_last_in else f"before {_ist(first_out).strftime('%d %b %H:%M')}"
             dur_row = dur_df[(dur_df["location_name"] == row["location_name"]) & (dur_df["name"] == row["name"])]
             times_this_week = int(dur_row.iloc[0]["oos_episodes"]) if not dur_row.empty else 1
+            rivals = comp_in_stock_by_store.get(row["location_name"], [])
             stockouts.append({
                 "product": row["name"], "pack": row["unit"] or "", "mrp": round(float(row["mrp"] or row["price"] or 0)),
-                "store": row["location_name"], "since": _ist(since_ts).strftime("%H:%M"),
+                "store": row["location_name"], "since": _ist(first_out).strftime("%H:%M"),
+                "outBetween": out_between, "outRange": out_range,
+                "outDuringPeak": _in_peak(first_out) or _in_peak(last_in),
                 "minutesOut": minutes_out, "timesThisWeek": times_this_week,
                 # Real-time multi-store checks are rate-limited and only run
                 # on demand (POST /api/nearby), not automatically for every
                 # row on every page load - see README "Wiring real data".
                 "nearby": {"tone": "neutral", "text": "Check nearby stores"},
-                "competitorInStock": None,  # no product<->competitor mapping exists yet (see change_notes.html section 7)
+                # Real data now: rival brands with any in-stock product at the
+                # same store (share gap), not a SKU-level product mapping.
+                "competitorInStock": ", ".join(rivals) if rivals else None,
                 # Extra fields beyond the original contract - the frontend's
                 # "Check nearby stores" button needs these to call /api/nearby.
                 "productId": row["product_id"], "pincode": row.get("pincode", ""),
@@ -399,16 +462,18 @@ def build_dashboard(brand: str | None = None) -> dict:
         comparison.append({"brand": i, "availabilityPct": pct, "previousPct": round(prev_pct) if prev_pct is not None else pct, "products": products, "outNow": out_now})
 
     competitor_oos = oos_now_latest[oos_now_latest["brand"] != client_brand] if not oos_now_latest.empty else oos_now_latest
-    competitor_since = current_stockout_started_at(df[df["brand"] != client_brand])
+    competitor_window = current_stockout_window(df[df["brand"] != client_brand])
     competitor_stockouts = []
     if not competitor_oos.empty:
         for _, row in competitor_oos.head(10).iterrows():
-            since_row = competitor_since[(competitor_since["location_name"] == row["location_name"]) & (competitor_since["product_id"] == row["product_id"])]
-            since_ts = since_row.iloc[0]["since"] if not since_row.empty else row["fetched_at"]
-            minutes_out = max(0, int((now - pd.Timestamp(since_ts)).total_seconds() / 60))
+            w = competitor_window[(competitor_window["location_name"] == row["location_name"]) & (competitor_window["product_id"] == row["product_id"])]
+            first_out = w.iloc[0]["first_out_at"] if not w.empty else row["fetched_at"]
+            last_in = w.iloc[0]["last_in_stock_at"] if not w.empty else None
+            minutes_out, out_range = _out_bounds(first_out, last_in, now)
             competitor_stockouts.append({
                 "product": f"{row['brand']} {row['name']}", "pack": row["unit"] or "", "store": row["location_name"],
-                "minutesOut": minutes_out, "yourOption": None,  # no product<->competitor mapping exists yet
+                "minutesOut": minutes_out, "outRange": out_range,
+                "yourOption": None,  # no product<->competitor mapping exists yet
             })
 
     # ---- forecast ---- (depletion_forecast() doesn't carry `unit`, so look it up from `latest`)

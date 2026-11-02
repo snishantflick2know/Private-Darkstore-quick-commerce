@@ -21,7 +21,7 @@ export function heroCard(data) {
       <div class="hero-stats">
         <div><div class="stat-label">Products in stock</div><div class="stat-value num">${h.productsInStock} <small>of ${data.brand.totalProducts}</small></div></div>
         <div><div class="stat-label">Behind ${esc(h.leaderName)}</div><div class="stat-value num d-bad">${h.pointsBehindLeader} points</div></div>
-        <div><div class="stat-label">Hours off shelf</div><div class="stat-value num">${h.hoursOffShelf} hrs <small class="d-bad">up ${h.hoursOffShelfChange}</small></div></div>
+        <div><div class="stat-label">Hours off shelf</div><div class="stat-value num">${h.hoursOffShelf} hrs <small class="d-bad">${h.peakHoursOffShelf != null ? `${h.peakHoursOffShelf} in peak` : `up ${h.hoursOffShelfChange}`}</small></div></div>
         <div><div class="stat-label">Average outage</div><div class="stat-value num">${avgH} hr ${avgM} min</div></div>
       </div>
     </div>
@@ -131,13 +131,13 @@ export function outOfStockNow(data) {
     <div class="trow cols-oos-mini">
       <span><span class="cell-main">${esc(o.product)}</span><span class="cell-sub">${esc(o.pack)}, ₹${o.mrp}</span></span>
       <span>${esc(o.store)}</span>
-      <span class="r num" style="color:var(--ink)">${duration(o.minutesOut)}</span>
+      <span class="r num" style="color:var(--ink)">${esc(o.outRange || duration(o.minutesOut))}</span>
       <span>${badge(o.nearby.tone, o.nearby.text)}</span>
     </div>`).join('');
   return `
   <section class="card clip col-wide" data-note="13">
     <div class="card-head">
-      <div><h2 class="card-title">Out of stock right now</h2><p class="card-sub">Your products, longest outage first, and whether a nearby store has them</p></div>
+      <div><h2 class="card-title">Out of stock right now</h2><p class="card-sub">Your products, longest outage first, and whether a nearby store has them. Durations are honest ranges between checks, not point guesses.</p></div>
       <button type="button" class="link" data-action="go" data-page="stock">View all →</button>
     </div>
     <div class="tscroll">

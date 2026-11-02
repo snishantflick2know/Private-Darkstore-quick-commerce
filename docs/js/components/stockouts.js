@@ -1,5 +1,5 @@
 /* Stock-outs page (change note #16) */
-import { esc, badge, duration, clock } from '../util.js';
+import { esc, badge, duration } from '../util.js';
 import { horizontalBars, verticalBars } from '../charts.js';
 
 const times = n => n === 1 ? 'Once' : `${n} times`;
@@ -12,13 +12,13 @@ export function stockoutsPage(data) {
     <div class="trow cols-oos-full">
       <span><span class="cell-main">${esc(o.product)}</span><span class="cell-sub">${esc(o.pack)}, ₹${o.mrp}</span></span>
       <span>${esc(o.store)}</span>
-      <span class="num">${clock(o.since)}</span>
-      <span class="r num" style="color:var(--ink)">${duration(o.minutesOut)}</span>
+      <span class="num" style="white-space:nowrap">${esc(o.outBetween || (o.since ? 'since ' + o.since : '—'))}${o.outDuringPeak ? ' ' + badge('warn', 'peak hrs') : ''}</span>
+      <span class="r num" style="color:var(--ink)">${esc(o.outRange || duration(o.minutesOut))}</span>
       <span class="r">${times(o.timesThisWeek)}</span>
       <span>${o.nearby.tone === 'neutral' && o.nearby.text === 'Check nearby stores'
         ? `<button type="button" class="btn small" data-action="check-nearby" data-index="${i}">Check nearby stores</button>`
         : badge(o.nearby.tone, o.nearby.text)}</span>
-      <span>${esc(o.competitorInStock || 'None')}</span>
+      <span>${o.competitorInStock ? badge('warn', esc(o.competitorInStock)) : 'None'}</span>
     </div>`).join('');
 
   const hours = horizontalBars(
@@ -29,11 +29,11 @@ export function stockoutsPage(data) {
   <div class="stack" data-note="16">
     <section class="card clip">
       <div class="card-head">
-        <div><h2 class="card-title">Your products that are out of stock</h2><p class="card-sub">When the nearest store runs out, one close by often still has stock. Click "Check nearby stores" on a row to look, live (we check up to 3 neighbouring stores per product).</p></div>
+        <div><h2 class="card-title">Your products that are out of stock</h2><p class="card-sub">"Went out" is an honest window, not a guess - we only see stock at each check, so it's the gap between the last in-stock and first out-of-stock reading (it tightens as checks get more frequent). "Competitor in stock" = rival brands still selling at that store right now - those are lost sales.</p></div>
         <div style="display:flex;gap:8px"><button type="button" class="btn" data-action="export">Download CSV</button></div>
       </div>
       <div class="tscroll">
-        <div class="thead cols-oos-full"><span>Product</span><span>Dark store</span><span>Since</span><span class="r">Out for</span><span class="r">This week</span><span>Nearby stores</span><span>Competitor in stock</span></div>
+        <div class="thead cols-oos-full"><span>Product</span><span>Dark store</span><span>Went out</span><span class="r">Out for</span><span class="r">This week</span><span>Nearby stores</span><span>Competitor in stock</span></div>
         ${rows}
       </div>
     </section>

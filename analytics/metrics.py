@@ -1,7 +1,23 @@
 """Core analytics: OOS detection, competitive benchmarking, depletion prediction."""
 from __future__ import annotations
 
+from zoneinfo import ZoneInfo
+
 import pandas as pd
+
+# Peak selling window for Indian quick-commerce, in IST. Stock-outs inside
+# this window cost far more than overnight ones - a core FMCG distinction the
+# dashboard reports separately (see oos_hours_by_daypart).
+IST = ZoneInfo("Asia/Kolkata")
+PEAK_START_HOUR_IST = 18  # 6 PM
+PEAK_END_HOUR_IST = 23    # through 10:59 PM
+
+
+def _ist_hour(ts) -> int:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return t.tz_convert(IST).hour
 
 
 def latest_snapshot(df: pd.DataFrame) -> pd.DataFrame:
@@ -231,6 +247,73 @@ def current_stockout_started_at(df: pd.DataFrame) -> pd.DataFrame:
                 break
         rows.append(dict(zip(key_cols, keys), since=since))
     return pd.DataFrame(rows, columns=cols)
+
+
+def current_stockout_window(df: pd.DataFrame) -> pd.DataFrame:
+    """The honest censoring window for each product sold out right now: it went
+    out sometime between `last_in_stock_at` (the last check that still saw it in
+    stock, if we ever saw it in stock) and `first_out_at` (the first check of the
+    current sold-out streak). FMCG-correct framing - a between-checks stock-out
+    is a bounded interval, not a point in time, and the bounds tighten as check
+    frequency increases. `last_in_stock_at` is NaT when the product was already
+    out at our first-ever observation."""
+    cols = ["platform", "location_name", "product_id", "brand", "name",
+            "last_in_stock_at", "first_out_at"]
+    if df.empty:
+        return pd.DataFrame(columns=cols)
+
+    rows = []
+    key_cols = ["platform", "location_name", "product_id", "brand", "name"]
+    for keys, grp in df.sort_values("fetched_at").groupby(key_cols):
+        grp = grp.reset_index(drop=True)
+        if not bool(grp.iloc[-1]["is_sold_out"]):
+            continue  # not currently sold out
+        first_out = grp.iloc[-1]["fetched_at"]
+        last_in = None
+        for i in range(len(grp) - 1, -1, -1):
+            if bool(grp.iloc[i]["is_sold_out"]):
+                first_out = grp.iloc[i]["fetched_at"]
+            else:
+                last_in = grp.iloc[i]["fetched_at"]
+                break
+        rows.append(dict(zip(key_cols, keys),
+                         last_in_stock_at=last_in, first_out_at=first_out))
+    return pd.DataFrame(rows, columns=cols)
+
+
+def oos_hours_by_daypart(df: pd.DataFrame) -> pd.DataFrame:
+    """Split each brand's observed sold-out hours into peak (6-11 PM IST) vs
+    off-peak, using the same gap-attribution model as stockout_duration_hours()
+    (each inter-check gap is counted against the daypart of the check that began
+    it), so the two functions' totals reconcile."""
+    cols = ["brand", "oos_hours_peak", "oos_hours_offpeak"]
+    if df.empty:
+        return pd.DataFrame(columns=cols)
+
+    totals: dict[str, list[float]] = {}
+    key_cols = ["platform", "location_name", "product_id", "brand", "name"]
+    for keys, grp in df.sort_values("fetched_at").groupby(key_cols):
+        brand = keys[3]
+        peak = offpeak = 0.0
+        prev_time = None
+        prev_sold_out = False
+        for _, row in grp.iterrows():
+            if prev_time is not None and prev_sold_out:
+                gap = (row["fetched_at"] - prev_time).total_seconds() / 3600
+                if PEAK_START_HOUR_IST <= _ist_hour(prev_time) < PEAK_END_HOUR_IST:
+                    peak += gap
+                else:
+                    offpeak += gap
+            prev_time = row["fetched_at"]
+            prev_sold_out = bool(row["is_sold_out"])
+        t = totals.setdefault(brand, [0.0, 0.0])
+        t[0] += peak
+        t[1] += offpeak
+
+    return pd.DataFrame(
+        [{"brand": b, "oos_hours_peak": round(p, 1), "oos_hours_offpeak": round(o, 1)}
+         for b, (p, o) in totals.items()]
+    )
 
 
 def depletion_forecast(df: pd.DataFrame, min_points: int = 3) -> pd.DataFrame:

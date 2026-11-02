@@ -81,11 +81,11 @@ export const SAMPLE = {
 
   // Your products currently at 0 units. nearby.tone: ok | crit | neutral
   stockouts: [
-    { product: 'Kala Khatta',    pack: '200 ml', mrp: 30, store: 'Saket',        since: '09:50', minutesOut: 230, timesThisWeek: 2, nearby: { tone: 'ok',      text: '4 at store 49971' }, competitorInStock: 'Real Jamun' },
-    { product: 'Aam Panna',      pack: '200 ml', mrp: 30, store: 'Lajpat Nagar', since: '10:15', minutesOut: 205, timesThisWeek: 3, nearby: { tone: 'crit',    text: 'Out nearby too' },   competitorInStock: null },
-    { product: 'Alphonso Mango', pack: '1 L',    mrp: 99, store: 'Lajpat Nagar', since: '11:38', minutesOut: 122, timesThisWeek: 1, nearby: { tone: 'crit',    text: 'May be delisted' },  competitorInStock: 'Real Mango' },
-    { product: 'Aamras',         pack: '200 ml', mrp: 30, store: 'Sohna Road',   since: '11:42', minutesOut: 118, timesThisWeek: 4, nearby: { tone: 'ok',      text: '6 at store 31719' }, competitorInStock: 'Real Mixed Fruit' },
-    { product: 'Jaljeera',       pack: '250 ml', mrp: 35, store: 'Sohna Road',   since: '11:42', minutesOut: 118, timesThisWeek: 2, nearby: { tone: 'neutral', text: 'Not sold nearby' },  competitorInStock: 'B Natural' }
+    { product: 'Kala Khatta',    pack: '200 ml', mrp: 30, store: 'Saket',        since: '09:50', minutesOut: 230, outBetween: '08:50–09:50', outRange: '3h 50m–4h 50m', outDuringPeak: true, timesThisWeek: 2, nearby: { tone: 'ok',      text: '4 at store 49971' }, competitorInStock: 'Real' },
+    { product: 'Aam Panna',      pack: '200 ml', mrp: 30, store: 'Lajpat Nagar', since: '10:15', minutesOut: 205, outBetween: '09:15–10:15', outRange: '3h 25m–4h 25m', outDuringPeak: false, timesThisWeek: 3, nearby: { tone: 'crit',    text: 'Out nearby too' },   competitorInStock: null },
+    { product: 'Alphonso Mango', pack: '1 L',    mrp: 99, store: 'Lajpat Nagar', since: '11:38', minutesOut: 122, outBetween: '10:38–11:38', outRange: '2h 2m–3h 2m', outDuringPeak: false, timesThisWeek: 1, nearby: { tone: 'crit',    text: 'May be delisted' },  competitorInStock: 'Real' },
+    { product: 'Aamras',         pack: '200 ml', mrp: 30, store: 'Sohna Road',   since: '11:42', minutesOut: 118, outBetween: '10:42–11:42', outRange: '1h 58m–2h 58m', outDuringPeak: false, timesThisWeek: 4, nearby: { tone: 'ok',      text: '6 at store 31719' }, competitorInStock: 'Real, Tropicana' },
+    { product: 'Jaljeera',       pack: '250 ml', mrp: 35, store: 'Sohna Road',   since: '11:42', minutesOut: 118, outBetween: '10:42–11:42', outRange: '1h 58m–2h 58m', outDuringPeak: false, timesThisWeek: 2, nearby: { tone: 'neutral', text: 'Not sold nearby' },  competitorInStock: 'B Natural' }
   ],
 
   // Needs your attention. tone: crit | warn | brand; goTo = page id
@@ -117,9 +117,9 @@ export const SAMPLE = {
     { brand: 4, availabilityPct: 79, previousPct: 81, products: 15, outNow: 3 }
   ],
   competitorStockouts: [
-    { product: 'Real Mixed Fruit',         pack: '1 L', store: 'Lajpat Nagar', minutesOut: 120, yourOption: 'Mixed Fruit 1 L' },
-    { product: 'Tropicana Orange Delight', pack: '1 L', store: 'Sohna Road',   minutesOut: 118, yourOption: null },
-    { product: 'B Natural Guava',          pack: '1 L', store: 'Saket',        minutesOut: 45,  yourOption: 'Guava Twist' }
+    { product: 'Real Mixed Fruit',         pack: '1 L', store: 'Lajpat Nagar', minutesOut: 120, outRange: '2h–3h', yourOption: 'Mixed Fruit 1 L' },
+    { product: 'Tropicana Orange Delight', pack: '1 L', store: 'Sohna Road',   minutesOut: 118, outRange: '1h 58m–2h 58m', yourOption: null },
+    { product: 'B Natural Guava',          pack: '1 L', store: 'Saket',        minutesOut: 45,  outRange: '45 min–1h 45m', yourOption: 'Guava Twist' }
   ],
 
   // Forecast page

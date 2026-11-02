@@ -23,7 +23,7 @@ export function competitionPage(data) {
 
   const theirs = data.competitorStockouts.map(c => `
     <div class="trow cols-comp-oos">
-      <span><span class="cell-main">${esc(c.product)}</span><span class="cell-sub">${esc(c.pack)}, out for ${duration(c.minutesOut)}</span></span>
+      <span><span class="cell-main">${esc(c.product)}</span><span class="cell-sub">${esc(c.pack)}, out for ${esc(c.outRange || duration(c.minutesOut))}</span></span>
       <span>${esc(c.store)}</span>
       <span>${c.yourOption ? badge('ok', c.yourOption) : badge('neutral', 'Nothing similar', false)}</span>
     </div>`).join('');
