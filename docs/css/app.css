@@ -176,7 +176,7 @@ h1, h2, p { margin: 0; }
 .cols-bench { grid-template-columns: minmax(150px, 1.2fr) minmax(170px, 1.5fr) 56px 84px 48px 44px; min-width: 600px; }
 .cols-comp-oos { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr); }
 .cols-forecast { grid-template-columns: minmax(140px, 1.2fr) 130px 80px 90px minmax(220px, 2fr) 140px; min-width: 820px; }
-.cols-products { grid-template-columns: minmax(110px, 0.9fr) minmax(170px, 1.4fr) 90px minmax(110px, 1fr) 70px 80px 110px; min-width: 820px; }
+.cols-products { grid-template-columns: minmax(100px, 0.8fr) minmax(170px, 1.3fr) minmax(90px, 1fr) 90px 60px 60px 70px 90px 130px; min-width: 1060px; }
 .track { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; flex: 1; }
 .track span { display: block; height: 100%; border-radius: 3px; }
 .bar-cell { display: flex; align-items: center; gap: 10px; }
@@ -228,6 +228,19 @@ h1, h2, p { margin: 0; }
 .panel-bar { display: grid; grid-template-columns: 110px minmax(0, 1fr) 40px; gap: 10px; align-items: center; font-size: 13px; }
 .panel-oos { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: 13px; }
 .panel-empty { padding: 12px; border-radius: var(--radius-md); background: var(--ok-bg); color: var(--ok-ink); font-size: 13px; }
+
+/* metadata page - schema info panel */
+.meta-info { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); box-shadow: var(--shadow-card); margin-bottom: 14px; }
+.meta-info summary { display: flex; align-items: center; gap: 8px; padding: 16px 20px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--ink-2); list-style: none; }
+.meta-info summary::-webkit-details-marker { display: none; }
+.meta-info summary .ic { color: var(--brand); }
+.meta-info-body { padding: 0 20px 20px; }
+.meta-info-body h3 { font-size: 15px; font-weight: 600; margin: 0 0 12px; }
+.meta-info-body code { font-size: 12.5px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+.meta-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.meta-table th { text-align: left; font-size: 12px; font-weight: 500; color: var(--subtle); background: var(--surface-2); padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.meta-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
+.meta-table tr:last-child td { border-bottom: 0; }
 
 .footnote { font-size: var(--fs-label); color: var(--subtle); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 6px; }
 

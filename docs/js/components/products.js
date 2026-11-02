@@ -22,21 +22,24 @@ export function productCatalog(data, state) {
       <span style="font-weight:500">${esc(p.brand)}</span>
       <span><span class="cell-main">${esc(p.product)}</span><span class="cell-sub">${esc(p.pack)}</span></span>
       <span>${esc(p.store)}</span>
+      <span class="num" style="color:var(--subtle)">${esc(p.merchantId || '—')}</span>
       <span class="r num">₹${p.price}</span>
+      <span class="r num" style="color:var(--subtle)">₹${p.mrp}</span>
       <span class="r num">${p.inventory}</span>
       <span>${p.status === 'Out of stock' ? badge('crit', 'Out of stock') : badge('ok', 'In stock')}</span>
+      <span class="num" style="color:var(--subtle);white-space:nowrap">${esc(p.capturedAt)}</span>
     </div>`).join('');
 
   return `
   <section class="card clip">
     <div class="card-head">
-      <div><h2 class="card-title">All products</h2><p class="card-sub">Every tracked brand's products and live inventory, at the last check</p></div>
+      <div><h2 class="card-title">All products</h2><p class="card-sub">Every tracked brand's products and live inventory, at the last check - the raw <code>snapshots</code> data, not a summary</p></div>
       <button type="button" class="btn" data-action="export">Download CSV</button>
     </div>
     <div class="chips" role="group" aria-label="Filter by brand" style="margin-bottom:8px">${brandChips}</div>
     <div class="chips" role="group" aria-label="Filter by store">${storeChips}</div>
     <div class="tscroll">
-      <div class="thead cols-products"><span>Brand</span><span>Product</span><span>Store</span><span class="r">Price</span><span class="r">Inventory</span><span>Status</span></div>
+      <div class="thead cols-products"><span>Brand</span><span>Product</span><span>Store</span><span>Merchant ID</span><span class="r">Price</span><span class="r">MRP</span><span class="r">Inventory</span><span>Status</span><span>Captured at</span></div>
       ${rows || '<div class="panel-empty" style="padding:20px">No products found for this filter.</div>'}
     </div>
   </section>`;

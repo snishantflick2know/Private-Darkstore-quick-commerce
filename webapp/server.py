@@ -408,13 +408,23 @@ def build_dashboard(brand: str | None = None) -> dict:
     # inventory per store) - the individual-product/inventory view that
     # existed in the Streamlit app's OOS/KPI drill-down tables, but has no
     # equivalent page in the new design yet. Not part of the original API
-    # contract - added because it was a real feature being lost in the port. ----
+    # contract - added because it was a real feature being lost in the port.
+    # Field names mirror the actual `snapshots` SQLite columns closely (not
+    # just a curated subset) so the Metadata page is a faithful view of what's
+    # really stored, not an approximation - see storage/db.py's SCHEMA. ----
     products = []
     for _, r in latest.sort_values(["brand", "location_name", "name"]).iterrows():
         products.append({
             "brand": r["brand"], "product": r["name"], "pack": r["unit"] or "", "store": r["location_name"],
-            "price": round(float(r["price"] or 0)), "inventory": int(r["inventory"] or 0),
+            "merchantId": r["merchant_id"] or "", "price": round(float(r["price"] or 0)),
+            "mrp": round(float(r["mrp"] or 0)), "inventory": int(r["inventory"] or 0),
             "status": "Out of stock" if r["is_sold_out"] else "In stock",
+            # Sent pre-formatted (unlike most other timestamps in this payload,
+            # which send raw minutes/HH:MM for the frontend to format) because
+            # rows here can span the full 30-day retention window, not just
+            # "today" - there's no existing frontend helper for formatting an
+            # arbitrary past date, only same-day "HH:MM" (see util.js clock()).
+            "capturedAt": pd.Timestamp(r["fetched_at"]).strftime("%d %b, %H:%M") + " UTC",
         })
 
     # ---- alerts ----
