@@ -38,6 +38,15 @@ def main() -> None:
     n, n_notifs = _server._run_refresh()
     print(f"Collected {n} rows, {n_notifs} new alert(s).")
 
+    if n == 0:
+        # Blinkit 403-blocks GitHub's datacenter IPs, so scheduled runs often
+        # scrape nothing. Exporting anyway would only bump the "X min ago"
+        # counters while the underlying data stays identical - empty churn
+        # commits that also conflict with real refreshes pushed from a local
+        # (residential-IP) machine via refresh.command. Skip instead.
+        print("No new rows - skipping export (would only produce an empty churn commit).")
+        return
+
     DOCS_DATA.mkdir(parents=True, exist_ok=True)
     brands_out = []
     for brand in TRACKED_BRANDS:
