@@ -445,6 +445,24 @@ def build_dashboard(brand: str | None = None) -> dict:
             "capturedAt": _ist(r["fetched_at"]).strftime("%d %b, %H:%M") + " IST",
         })
 
+    # ---- raw snapshot history: one row per scrape run (NOT deduplicated to
+    # latest like `products` above) - this is the actual append-only "track"
+    # the `snapshots` table accumulates every hour, so a user can watch the
+    # same product's inventory/status change run-over-run. Capped at 2000
+    # rows (newest first) so the static GitHub Pages JSON stays a sane size
+    # at ~330-390 rows per hourly scrape; locally the full 30-day history is
+    # still in SQLite regardless. ----
+    snapshot_history = []
+    hist = df.sort_values("fetched_at", ascending=False).head(2000)
+    for _, r in hist.iterrows():
+        snapshot_history.append({
+            "brand": r["brand"], "product": r["name"], "pack": r["unit"] or "", "store": r["location_name"],
+            "merchantId": r["merchant_id"] or "", "productId": r["product_id"] or "", "price": round(float(r["price"] or 0)),
+            "mrp": round(float(r["mrp"] or 0)), "inventory": int(r["inventory"] or 0),
+            "status": "Out of stock" if r["is_sold_out"] else "In stock",
+            "capturedAt": _ist(r["fetched_at"]).strftime("%d %b, %H:%M") + " IST",
+        })
+
     # ---- alerts ----
     notif_df = load_notifications(_DB_PATH)
     alerts = []
@@ -483,6 +501,7 @@ def build_dashboard(brand: str | None = None) -> dict:
         "forecast": forecast,
         "alerts": alerts,
         "products": products,
+        "snapshotHistory": snapshot_history,
     }
 
 

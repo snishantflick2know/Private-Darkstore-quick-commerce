@@ -134,13 +134,21 @@ export const SAMPLE = {
   // so the individual-product/inventory view has sample data too when the
   // backend isn't running).
   products: [
-    { brand: 'Paper Boat', product: 'Paper Boat Aamras Mango Drink', pack: '200 ml', store: 'Sohna Road', price: 30, inventory: 0, status: 'Out of stock' },
-    { brand: 'Paper Boat', product: 'Paper Boat Jaljeera', pack: '250 ml', store: 'Sohna Road', price: 35, inventory: 2, status: 'In stock' },
-    { brand: 'Paper Boat', product: 'Paper Boat Kala Khatta', pack: '200 ml', store: 'Sohna Road', price: 30, inventory: 3, status: 'In stock' },
-    { brand: 'Real', product: 'Real Mixed Fruit Juice', pack: '1 L', store: 'Sohna Road', price: 110, inventory: 14, status: 'In stock' },
-    { brand: 'Tropicana', product: 'Tropicana Orange Delight', pack: '1 L', store: 'Sohna Road', price: 115, inventory: 0, status: 'Out of stock' },
-    { brand: 'B Natural', product: 'B Natural Guava', pack: '1 L', store: 'Saket', price: 105, inventory: 6, status: 'In stock' },
-    { brand: 'Raw Pressery', product: 'Raw Pressery Cold Pressed Juice', pack: '250 ml', store: 'Lajpat Nagar', price: 95, inventory: 9, status: 'In stock' }
+    { brand: 'Paper Boat', product: 'Paper Boat Aamras Mango Drink', pack: '200 ml', store: 'Sohna Road', merchantId: '1234', mrp: 35, price: 30, inventory: 0, status: 'Out of stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Paper Boat', product: 'Paper Boat Jaljeera', pack: '250 ml', store: 'Sohna Road', merchantId: '1234', mrp: 40, price: 35, inventory: 2, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Paper Boat', product: 'Paper Boat Kala Khatta', pack: '200 ml', store: 'Sohna Road', merchantId: '1234', mrp: 35, price: 30, inventory: 3, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Real', product: 'Real Mixed Fruit Juice', pack: '1 L', store: 'Sohna Road', merchantId: '1234', mrp: 125, price: 110, inventory: 14, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Tropicana', product: 'Tropicana Orange Delight', pack: '1 L', store: 'Sohna Road', merchantId: '1234', mrp: 130, price: 115, inventory: 0, status: 'Out of stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'B Natural', product: 'B Natural Guava', pack: '1 L', store: 'Lajpat Nagar', merchantId: '35554', mrp: 120, price: 105, inventory: 6, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Raw Pressery', product: 'Raw Pressery Cold Pressed Juice', pack: '250 ml', store: 'Lajpat Nagar', merchantId: '35554', mrp: 110, price: 95, inventory: 9, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' }
+  ],
+
+  // Raw append-only snapshot history (same fields as products, but one row
+  // per scrape run rather than deduplicated to latest - see server.py).
+  snapshotHistory: [
+    { brand: 'Paper Boat', product: 'Paper Boat Jaljeera', pack: '250 ml', store: 'Sohna Road', merchantId: '1234', mrp: 40, price: 35, inventory: 2, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
+    { brand: 'Paper Boat', product: 'Paper Boat Jaljeera', pack: '250 ml', store: 'Sohna Road', merchantId: '1234', mrp: 40, price: 35, inventory: 3, status: 'In stock', capturedAt: '02 Nov, 23:21 IST' },
+    { brand: 'Paper Boat', product: 'Paper Boat Jaljeera', pack: '250 ml', store: 'Sohna Road', merchantId: '1234', mrp: 40, price: 35, inventory: 4, status: 'In stock', capturedAt: '02 Nov, 22:21 IST' }
   ],
 
   // Alerts page. type must be one of the keys in ALERT_TONE (components/alerts.js)

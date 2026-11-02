@@ -33,6 +33,7 @@ const state = {
   alertType: 'All',
   productBrand: 'All',
   productStore: 'All',
+  productView: 'latest',
   store: params.has('store') ? Number(params.get('store')) : -1,  // index into data.stores, -1 = panel closed
   theme: readTheme(),
   busy: false
@@ -175,6 +176,7 @@ document.addEventListener('click', e => {
     case 'alert-filter':  state.alertType = value; break;
     case 'product-filter': state.productBrand = value; break;
     case 'product-store-filter': state.productStore = value; break;
+    case 'product-view':   state.productView = value; break;
     case 'toggle-theme':  state.theme = state.theme === 'dark' ? 'light' : 'dark'; saveTheme(state.theme); break;
     default: return;
   }
