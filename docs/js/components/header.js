@@ -7,7 +7,8 @@ export const PAGE_TITLES = {
   stock:       ['Stock-outs',  "What's out of stock"],
   competition: ['Competition', 'You vs other brands'],
   forecast:    ['Forecast',    'What runs out next'],
-  alerts:      ['Alerts',      'Alerts']
+  alerts:      ['Alerts',      'Alerts'],
+  metadata:    ['Metadata',    'The raw underlying data behind every number on this dashboard']
 };
 
 // Zepto/Instamart and the Today/7D/30D period toggle were in the original

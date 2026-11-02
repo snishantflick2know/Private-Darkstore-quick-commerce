@@ -7,7 +7,8 @@ export const PAGES = [
   { id: 'stock',       label: 'Stock-outs',         icon: 'stock',       count: d => d.stockouts.length, countTone: 'crit' },
   { id: 'competition', label: 'Competition',        icon: 'competition' },
   { id: 'forecast',    label: 'Depletion forecast', icon: 'forecast' },
-  { id: 'alerts',      label: 'Alerts',             icon: 'alerts',      count: d => d.alerts.length, countTone: 'neutral' }
+  { id: 'alerts',      label: 'Alerts',             icon: 'alerts',      count: d => d.alerts.length, countTone: 'neutral' },
+  { id: 'metadata',    label: 'Metadata',           icon: 'data' }
 ];
 
 export function nav(data, state) {

@@ -21,6 +21,7 @@ import { stockoutsPage } from './components/stockouts.js';
 import { competitionPage } from './components/competition.js';
 import { forecastPage } from './components/forecast.js';
 import { alertsPage } from './components/alerts.js';
+import { metadataPage } from './components/metadata.js';
 import { storePanel } from './components/storePanel.js';
 
 const API_URL = '/api/dashboard';
@@ -130,11 +131,12 @@ function exportData() {
 }
 
 const PAGES = {
-  overview: (d, s) => overviewPage(d, s),
+  overview: d => overviewPage(d),
   stock: d => stockoutsPage(d),
   competition: d => competitionPage(d),
   forecast: d => forecastPage(d),
-  alerts: (d, s) => alertsPage(d, s)
+  alerts: (d, s) => alertsPage(d, s),
+  metadata: (d, s) => metadataPage(d, s)
 };
 
 function render() {

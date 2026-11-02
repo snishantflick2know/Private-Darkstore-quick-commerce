@@ -2,7 +2,6 @@
 import { esc, band, BAND_LABEL, badge, duration, units, swatch } from '../util.js';
 import { trendChart, sparkline, storeMap } from '../charts.js';
 import { icon } from '../icons.js';
-import { productCatalog } from './products.js';
 
 const ORDINAL = n => n + (['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
 
@@ -163,13 +162,12 @@ export function storeHealth(data) {
   </section>`;
 }
 
-export function overviewPage(data, state) {
+export function overviewPage(data) {
   return `
   <div class="stack">
     <div class="row">${heroCard(data)}${stockOnShelf(data)}</div>
     ${tiles(data)}
     <div class="row">${storeGrid(data)}${attention(data)}</div>
     <div class="row">${outOfStockNow(data)}${storeHealth(data)}</div>
-    ${productCatalog(data, state)}
   </div>`;
 }
