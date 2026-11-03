@@ -156,6 +156,7 @@ class BlinkitScraper:
         if not matches:
             return None
         is_sold_out_flag, ci = matches[0]
+        inventory = int(ci.get("inventory", 0) or 0)
         return ProductSnapshot(
             platform=self.platform,
             location_name=location_name,
@@ -168,8 +169,8 @@ class BlinkitScraper:
             unit=ci.get("unit", ""),
             price=float(ci.get("price") or 0),
             mrp=float(ci.get("mrp") or 0),
-            inventory=int(ci.get("inventory", 0) or 0),
-            is_sold_out=bool(is_sold_out_flag),
+            inventory=inventory,
+            is_sold_out=bool(is_sold_out_flag) or inventory <= 0,
         )
 
     def _parse_products(self, payload: dict, location_name: str, pincode: str, query: str) -> List[ProductSnapshot]:
@@ -184,6 +185,13 @@ class BlinkitScraper:
             if not cart_item:
                 continue  # not a product card (header, banner, etc.)
 
+            inventory = int(data.get("inventory", cart_item.get("inventory", 0)) or 0)
+            # The search-level is_sold_out flag is unreliable: verified 2026-11-03
+            # that a product (Tropicana Litchi 45364) reported is_sold_out=false
+            # here while the authoritative product-detail endpoint reported
+            # is_sold_out=true for it - with inventory=0 in both. Zero sellable
+            # units IS out of stock in FMCG terms, so treat inventory<=0 as out.
+            is_sold_out = bool(data.get("is_sold_out", False)) or inventory <= 0
             snapshots.append(
                 ProductSnapshot(
                     platform=self.platform,
@@ -197,8 +205,8 @@ class BlinkitScraper:
                     unit=cart_item.get("unit", ""),
                     price=float(cart_item.get("price") or 0),
                     mrp=float(cart_item.get("mrp") or 0),
-                    inventory=int(data.get("inventory", cart_item.get("inventory", 0)) or 0),
-                    is_sold_out=bool(data.get("is_sold_out", False)),
+                    inventory=inventory,
+                    is_sold_out=is_sold_out,
                 )
             )
         return snapshots

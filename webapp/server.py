@@ -470,8 +470,10 @@ def build_dashboard(brand: str | None = None) -> dict:
             first_out = w.iloc[0]["first_out_at"] if not w.empty else row["fetched_at"]
             last_in = w.iloc[0]["last_in_stock_at"] if not w.empty else None
             minutes_out, out_range = _out_bounds(first_out, last_in, now)
+            # product names usually already include the brand - don't double it
+            disp = row["name"] if str(row["name"]).lower().startswith(str(row["brand"]).lower()) else f"{row['brand']} {row['name']}"
             competitor_stockouts.append({
-                "product": f"{row['brand']} {row['name']}", "pack": row["unit"] or "", "store": row["location_name"],
+                "product": disp, "pack": row["unit"] or "", "store": row["location_name"],
                 "minutesOut": minutes_out, "outRange": out_range,
                 "yourOption": None,  # no product<->competitor mapping exists yet
             })

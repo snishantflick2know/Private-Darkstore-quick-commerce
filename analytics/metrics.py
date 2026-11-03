@@ -112,10 +112,10 @@ def stockout_duration_hours(df: pd.DataFrame, only_affected: bool = True) -> pd.
     actually the good outcome - easy to misread as "this item is out of stock".
     """
     if df.empty:
-        return pd.DataFrame(columns=["platform", "location_name", "brand", "name", "oos_hours", "oos_episodes"])
+        return pd.DataFrame(columns=["platform", "location_name", "brand", "name", "unit", "oos_hours", "oos_episodes"])
 
     rows = []
-    key_cols = ["platform", "location_name", "product_id", "brand", "name"]
+    key_cols = ["platform", "location_name", "product_id", "brand", "name", "unit"]
     for keys, grp in df.sort_values("fetched_at").groupby(key_cols):
         grp = grp.reset_index(drop=True)
         oos_hours = 0.0
