@@ -549,6 +549,12 @@ def build_dashboard(brand: str | None = None) -> dict:
     notif_df = load_notifications(_DB_PATH)
     alerts = []
     if not notif_df.empty:
+        # Alerts are event-sourced (written once, at scrape time - see
+        # analytics/notifications.py) rather than recomputed, so old alerts
+        # for a brand later dropped from TRACKED_BRANDS would otherwise stick
+        # around in this feed forever even though that brand is gone from
+        # every other page. Filter to currently-tracked brands for consistency.
+        notif_df = notif_df[notif_df["brand"].isin(TRACKED_BRANDS)]
         for _, r in notif_df.head(100).iterrows():
             alerts.append({
                 "time": _ist(r["created_at"]).strftime("%H:%M"),

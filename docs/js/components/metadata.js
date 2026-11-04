@@ -13,7 +13,7 @@ const SNAPSHOT_SCHEMA = [
   ['location_name', 'TEXT', 'Configured area name', 'Lajpat Nagar'],
   ['pincode', 'TEXT', 'Area pincode (informational)', '110024'],
   ['merchant_id', 'TEXT', "Blinkit's internal dark-store ID actually serving this check", '35554'],
-  ['query', 'TEXT', 'Search term that surfaced this product', 'raw pressery'],
+  ['query', 'TEXT', 'Search term that surfaced this product', 'b natural juice'],
   ['product_id', 'TEXT', "Blinkit's internal product ID", '776334'],
   ['brand', 'TEXT', "Product's brand (normalized - see BRAND_ALIASES)", 'Pluckk'],
   ['name', 'TEXT', 'Product display name', 'Pluckk Cold Pressed Aam Panna Juice'],

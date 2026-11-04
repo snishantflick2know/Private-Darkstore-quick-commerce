@@ -25,7 +25,6 @@ export const SAMPLE = {
   brands: [
     { name: 'Paper Boat',   colorVar: '--brand' },
     { name: 'Real',         colorVar: '--c-real' },
-    { name: 'Raw Pressery', colorVar: '--c-raw' },
     { name: 'B Natural',    colorVar: '--c-bn' },
     { name: 'Tropicana',    colorVar: '--c-trop' }
   ],
@@ -45,7 +44,6 @@ export const SAMPLE = {
     series: [
       [91, 90, 89, 90, 88, 89, 86],
       [93, 94, 92, 93, 94, 93, 93],
-      [90, 91, 92, 90, 91, 92, 91],
       [87, 88, 89, 88, 87, 88, 88],
       [82, 80, 81, 79, 80, 78, 79]
     ]
@@ -54,10 +52,9 @@ export const SAMPLE = {
   // Units on shelf at last check, per brand index; changePct vs 7 days ago
   stockOnShelf: [
     { brand: 0, units: 1240, changePct: -6 },
-    { brand: 2, units: 1110, changePct: 3 },
     { brand: 1, units: 980,  changePct: 4 },
-    { brand: 4, units: 660,  changePct: -2 },
-    { brand: 3, units: 420,  changePct: 1 }
+    { brand: 3, units: 660,  changePct: -2 },
+    { brand: 2, units: 420,  changePct: 1 }
   ],
 
   // Four tiles. trend = last 7 data points for the sparkline.
@@ -72,11 +69,11 @@ export const SAMPLE = {
   // Availability % per store, one value per brand (same order as brands).
   // map = position on the 320x190 schematic map (replace with lat/lng later).
   stores: [
-    { name: 'Sohna Road',   city: 'Gurgaon',   values: [94, 96, 92, 90, 82], map: { x: 118, y: 162, lx: 132, ly: 166, anchor: 'start' } },
-    { name: 'Lajpat Nagar', city: 'New Delhi', values: [82, 91, 93, 88, 76], map: { x: 188, y: 66,  lx: 188, ly: 50,  anchor: 'middle' } },
-    { name: 'DLF Phase 3',  city: 'Gurgaon',   values: [88, 95, 90, 86, 80], map: { x: 56,  y: 112, lx: 56,  ly: 134, anchor: 'middle' } },
-    { name: 'Saket',        city: 'New Delhi', values: [79, 92, 89, 87, 77], map: { x: 140, y: 100, lx: 126, ly: 104, anchor: 'end' } },
-    { name: 'Sector 18',    city: 'Noida',     values: [87, 91, 91, 89, 80], map: { x: 268, y: 92,  lx: 268, ly: 114, anchor: 'middle' } }
+    { name: 'Sohna Road',   city: 'Gurgaon',   values: [94, 96, 90, 82], map: { x: 118, y: 162, lx: 132, ly: 166, anchor: 'start' } },
+    { name: 'Lajpat Nagar', city: 'New Delhi', values: [82, 91, 88, 76], map: { x: 188, y: 66,  lx: 188, ly: 50,  anchor: 'middle' } },
+    { name: 'DLF Phase 3',  city: 'Gurgaon',   values: [88, 95, 86, 80], map: { x: 56,  y: 112, lx: 56,  ly: 134, anchor: 'middle' } },
+    { name: 'Saket',        city: 'New Delhi', values: [79, 92, 87, 77], map: { x: 140, y: 100, lx: 126, ly: 104, anchor: 'end' } },
+    { name: 'Sector 18',    city: 'Noida',     values: [87, 91, 89, 80], map: { x: 268, y: 92,  lx: 268, ly: 114, anchor: 'middle' } }
   ],
 
   // Your products currently at 0 units. nearby.tone: ok | crit | neutral
@@ -111,10 +108,9 @@ export const SAMPLE = {
   // Competition page — per brand index
   comparison: [
     { brand: 1, availabilityPct: 93, previousPct: 92, products: 22, outNow: 1 },
-    { brand: 2, availabilityPct: 91, previousPct: 90, products: 28, outNow: 2 },
-    { brand: 3, availabilityPct: 88, previousPct: 88, products: 12, outNow: 1 },
+    { brand: 2, availabilityPct: 88, previousPct: 88, products: 12, outNow: 1 },
     { brand: 0, availabilityPct: 86, previousPct: 89, products: 34, outNow: 5 },
-    { brand: 4, availabilityPct: 79, previousPct: 81, products: 15, outNow: 3 }
+    { brand: 3, availabilityPct: 79, previousPct: 81, products: 15, outNow: 3 }
   ],
   competitorStockouts: [
     { product: 'Real Mixed Fruit',         pack: '1 L', store: 'Lajpat Nagar', minutesOut: 120, outRange: '2h–3h', yourOption: 'Mixed Fruit 1 L' },
@@ -139,8 +135,7 @@ export const SAMPLE = {
     { brand: 'Paper Boat', product: 'Paper Boat Kala Khatta', pack: '200 ml', store: 'Sohna Road', merchantId: '1234', mrp: 35, price: 30, inventory: 3, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
     { brand: 'Real', product: 'Real Mixed Fruit Juice', pack: '1 L', store: 'Sohna Road', merchantId: '1234', mrp: 125, price: 110, inventory: 14, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
     { brand: 'Tropicana', product: 'Tropicana Orange Delight', pack: '1 L', store: 'Sohna Road', merchantId: '1234', mrp: 130, price: 115, inventory: 0, status: 'Out of stock', capturedAt: '03 Nov, 00:21 IST' },
-    { brand: 'B Natural', product: 'B Natural Guava', pack: '1 L', store: 'Lajpat Nagar', merchantId: '35554', mrp: 120, price: 105, inventory: 6, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' },
-    { brand: 'Raw Pressery', product: 'Raw Pressery Cold Pressed Juice', pack: '250 ml', store: 'Lajpat Nagar', merchantId: '35554', mrp: 110, price: 95, inventory: 9, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' }
+    { brand: 'B Natural', product: 'B Natural Guava', pack: '1 L', store: 'Lajpat Nagar', merchantId: '35554', mrp: 120, price: 105, inventory: 6, status: 'In stock', capturedAt: '03 Nov, 00:21 IST' }
   ],
 
   // Raw append-only snapshot history (same fields as products, but one row

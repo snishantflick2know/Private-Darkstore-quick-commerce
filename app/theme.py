@@ -38,7 +38,6 @@ SIDEBAR_MUTED = MUTED_LIGHT
 # charts, line charts, store grid) instead of a different hue per chart.
 BRAND_COLORS = {
     "Real": "#0D9488",
-    "Raw Pressery": "#2563EB",
     "B Natural": "#DB2777",
     "Tropicana": "#98A2B3",
 }

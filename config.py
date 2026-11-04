@@ -20,8 +20,8 @@ GURGAON_LOCATIONS = [
 ]
 
 # Search queries run per location. Verified live against Blinkit to maximize
-# coverage across all 5 tracked brands below (see brand name note).
-SEARCH_QUERIES = ["paper boat", "tropicana", "b natural juice", "raw pressery"]
+# coverage across all tracked brands below (see brand name note).
+SEARCH_QUERIES = ["paper boat", "tropicana", "b natural juice"]
 
 # Brands tracked for competitive benchmarking. NOTE: these must match the brand
 # name actually printed on the product listing, not the parent company name.
@@ -32,7 +32,6 @@ TRACKED_BRANDS = [
     "B Natural",  # ITC
     "Real",  # Dabur
     "Tropicana",  # PepsiCo
-    "Raw Pressery",
 ]
 
 CLIENT_BRAND = "Paper Boat"
@@ -44,7 +43,6 @@ BRAND_COMPANIES = {
     "B Natural": "ITC",
     "Real": "Dabur",
     "Tropicana": "PepsiCo",
-    "Raw Pressery": "Rakyan Beverages",
 }
 
 CATEGORY_LABEL = "Juices"  # cosmetic label for the web dashboard's filter chip
