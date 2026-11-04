@@ -34,6 +34,6 @@ jobs:
         run: |
           git config user.name "shelf-pulse-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/stock_tracker.db docs/data
+          git add data/stock_tracker.db data/snapshot_history.xlsx docs/data
           git diff --cached --quiet || git commit -m "Auto-update live data [skip ci]"
           git push

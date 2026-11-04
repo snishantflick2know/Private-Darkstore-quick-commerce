@@ -15,7 +15,7 @@ python3 scripts/export_static_site.py || { echo "Scrape/export failed - see outp
 # Push only if the scrape actually changed something (timestamps change
 # every run, so there is almost always a diff - but don't fail on an
 # empty one).
-git add data/stock_tracker.db docs/data
+git add data/stock_tracker.db data/snapshot_history.xlsx docs/data
 if git diff --cached --quiet; then
   echo "Nothing new to commit - data unchanged."
 else

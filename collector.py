@@ -15,9 +15,9 @@ from __future__ import annotations
 import logging
 import time
 
-from config import DB_PATH, GURGAON_LOCATIONS, SEARCH_QUERIES, SNAPSHOT_RETENTION_DAYS
+from config import DB_PATH, EXCEL_EXPORT_PATH, GURGAON_LOCATIONS, SEARCH_QUERIES, SNAPSHOT_RETENTION_DAYS
 from scrapers.blinkit import BlinkitScraper
-from storage.db import init_db, prune_old_snapshots, save_snapshots
+from storage.db import export_to_excel, init_db, prune_old_snapshots, save_snapshots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -47,6 +47,12 @@ def run_once() -> int:
     pruned = prune_old_snapshots(DB_PATH, days=SNAPSHOT_RETENTION_DAYS)
     if pruned:
         logger.info("Pruned %d snapshot rows older than %d days.", pruned, SNAPSHOT_RETENTION_DAYS)
+
+    # Full-history mirror for anyone who wants to look past the dashboard's
+    # narrower UI_WINDOW_DAYS (see config.py) - same 30-day retention as
+    # SQLite, just in a format non-technical stakeholders can open directly.
+    excel_rows = export_to_excel(DB_PATH, EXCEL_EXPORT_PATH)
+    logger.info("Wrote %d rows to %s", excel_rows, EXCEL_EXPORT_PATH)
 
     return total
 

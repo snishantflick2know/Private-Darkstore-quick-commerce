@@ -102,6 +102,7 @@ from config import (  # noqa: E402
     DB_PATH,
     GURGAON_LOCATIONS,
     TRACKED_BRANDS,
+    UI_WINDOW_DAYS,
 )
 from storage.db import init_db, load_notifications, load_snapshots, save_notifications  # noqa: E402
 
@@ -148,6 +149,20 @@ def _live_scoped(df: pd.DataFrame) -> pd.DataFrame:
         return df
     df = df[df["location_name"].isin(_TRACKED_LOCATION_NAMES)]
     return df[~df["is_synthetic"]]
+
+
+def _window_scoped(df: pd.DataFrame) -> pd.DataFrame:
+    """Trims to the last UI_WINDOW_DAYS for everything the dashboard computes
+    (Overview/Stock-outs/Competition/Forecast/Metadata) - a deliberately
+    narrower view than the full 30-day SQLite/Excel history (see config.py).
+    Without a steady automated refresh cadence, showing weeks of sparse,
+    gappy data on every chart reads as noise; the full history is still fully
+    intact in the DB and gets mirrored to data/snapshot_history.xlsx on every
+    refresh for anyone who wants to dig past this window."""
+    if df.empty:
+        return df
+    cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=UI_WINDOW_DAYS)
+    return df[df["fetched_at"] >= cutoff]
 
 
 def _brand_list(df_brands: list[str], client_brand: str) -> list[dict]:
@@ -241,7 +256,7 @@ def build_dashboard(brand: str | None = None) -> dict:
     # page traffic. This just reads whatever's currently in SQLite, so page
     # loads are fast and never block on a live scrape.
     df_all = load_snapshots(_DB_PATH)
-    df = _live_scoped(df_all)
+    df = _window_scoped(_live_scoped(df_all))
 
     tracked = [b for b in TRACKED_BRANDS if not df.empty and b in set(df["brand"].unique())] or TRACKED_BRANDS
     client_brand = brand if brand in tracked else (CLIENT_BRAND if CLIENT_BRAND in tracked else (tracked[0] if tracked else CLIENT_BRAND))

@@ -56,6 +56,11 @@ CATEGORY_LABEL = "Juices"  # cosmetic label for the web dashboard's filter chip
 # file instead of the real one (exactly this bug happened once - see git
 # history / AGENTS.md if curious).
 DB_PATH = str(_PROJECT_ROOT / "data" / "stock_tracker.db")
+# Full-history mirror of the snapshots/notifications tables, regenerated after
+# every collector run (see collector.py) - lets a non-technical stakeholder
+# open the complete 30-day history directly, since the dashboard itself only
+# shows the last UI_WINDOW_DAYS (below).
+EXCEL_EXPORT_PATH = str(_PROJECT_ROOT / "data" / "snapshot_history.xlsx")
 # Shared by the Streamlit app's auto-refresh-if-stale check and the web
 # dashboard's background scheduler. Also mirrored in the GitHub Actions cron
 # schedule (.github/workflows/update-data.yml) - keep both in sync if you
@@ -66,6 +71,14 @@ AUTO_REFRESH_MINUTES = 60
 # this, the append-only snapshots table (and the git-committed .db file)
 # grows forever. 30 days is enough for the trend/depletion-forecast charts.
 SNAPSHOT_RETENTION_DAYS = 30
+# How much of that history the dashboard actually computes from (Overview,
+# Stock-outs, Competition, Forecast, Metadata). Kept separate from the 30-day
+# DB retention above: SQLite/the Excel export always keep the full 30 days for
+# a human to dig into, but for this manual-refresh demo workflow (no hourly
+# auto-trigger), showing weeks of sparse, gappy history on every chart is more
+# confusing than a focused recent window. Raise this back up if a steady
+# automated cadence resumes.
+UI_WINDOW_DAYS = 3
 
 # Experimental: multi-store "sector" coverage. A single point can be served by
 # several real dark stores with independent stock (confirmed: Sector 49 alone

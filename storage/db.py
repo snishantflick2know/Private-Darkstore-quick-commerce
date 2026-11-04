@@ -160,3 +160,38 @@ def load_notifications(db_path: str) -> pd.DataFrame:
     if not df.empty:
         df["created_at"] = pd.to_datetime(df["created_at"])
     return df
+
+
+def export_to_excel(db_path: str, out_path: str) -> int:
+    """Mirrors the full `snapshots` + `notifications` history (the complete
+    30-day SQLite retention, not just the dashboard's narrower UI_WINDOW_DAYS -
+    see config.py) into a human-readable .xlsx with one sheet each. Called
+    after every collector run so the file is always a complete, current copy -
+    overwritten wholesale each time rather than appended, since Excel has no
+    safe concurrent-append story and SQLite is already the real source of
+    truth. Returns the row count written to the snapshots sheet.
+    """
+    snaps = load_snapshots(db_path)
+    notifs = load_notifications(db_path)
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+
+    # Excel can't hold timezone-aware datetimes at all (raises on write) - keep
+    # the original UTC ISO string (matches the raw SQLite column exactly) and
+    # add a separate naive IST column for human readability, rather than
+    # silently reinterpreting/losing the timezone.
+    def _with_ist(df: pd.DataFrame, col: str) -> pd.DataFrame:
+        if df.empty or col not in df.columns:
+            return df
+        df = df.copy()
+        df[f"{col}_utc"] = df[col].astype(str)
+        df[f"{col}_ist"] = df[col].dt.tz_convert("Asia/Kolkata").dt.tz_localize(None)
+        return df.drop(columns=[col])
+
+    snaps_out = _with_ist(snaps, "fetched_at")
+    snaps_out = snaps_out.sort_values("fetched_at_utc", ascending=False) if not snaps_out.empty else snaps_out
+    notifs_out = _with_ist(notifs, "created_at")
+
+    with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
+        snaps_out.to_excel(writer, sheet_name="snapshots", index=False)
+        notifs_out.to_excel(writer, sheet_name="notifications", index=False)
+    return len(snaps)

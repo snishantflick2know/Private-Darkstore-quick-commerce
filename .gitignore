@@ -10,3 +10,4 @@ data/*.db.bak
 streamlit.log
 nohup.out
 webapp/__pycache__/
+logs/
